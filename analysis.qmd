@@ -48,100 +48,177 @@
      p <- p + geom_line(color = "blue")
      p <- p + geom_point(size = 4, color = c("red", rep("blue", 10)))
      p <- p + scale_x_continuous(limits = c(0,10), n.breaks = 11)
+     p <- p + scale_y_continuous(limits = c(0, .25))
      p <- p + theme_sjplot2() + labs(x = "N. of Dislikes", y = "")
      p
-     save_plot(here("Plots", "dis-dist.png"))
+     save_plot(here("Plots", "dis-dist.png"), 
+               height = 15, width = 20)
 ```
 
-```{r Bivariate Plots (Race)}
+```{r Univariate Distribution of Dislikes Plot (by year)}
+    a <- dplyr::filter(reg.dat, year == "06 21")
+    b <- dplyr::filter(reg.dat, year != "06 21")
+    c <- round(table(a$num.dis)/nrow(a), 2)[1:11]
+    d <- round(table(b$num.dis)/nrow(b), 2)[1:11]
+    plot.dat <- data.frame(cbind(count = 0:10, y.2021 = c, y.2023 = d)) %>% 
+      pivot_longer(
+      cols = c(2:3),
+      names_to = "Year",
+      values_to = "Prop"
+    ) %>% 
+      mutate(Year = factor(Year, labels = c("2021", "2023"))) %>% 
+      mutate(count = as.integer(count))
+    head(plot.dat)
+
+     p <- ggplot(data = plot.dat, 
+                 aes(x = count, y = Prop, color = Year, group = Year)) 
+     p <- p + geom_vline(xintercept = 1, color = "red", linetype = 2, linewidth = .75)
+     p <- p + geom_line(linewidth = 1) + geom_point(size = 5)
+     p <- p + scale_x_continuous(limits = c(0,10), n.breaks = 11)
+     p <- p + scale_y_continuous(limits = c(0, .3))
+     p <- p + theme_sjplot2() + labs(x = "N. of Dislikes", y = "")
+     p <- p + scale_color_manual(values = c("red", "blue"))
+     p <- p + theme(legend.position = "top")
+     p
+     save_plot(here("Plots", "dis-dist-year.png"), 
+               height = 15, width = 20)
+```
+
+
+```{r Bar Plot Function}
+    make.bar <-function(w, x, y, plotname, m){
+      col_names <- names(w)
+      col_name_x <- col_names[[x]]
+      col_name_y <- col_names[[y]]
+      
+      p <- ggplot(data = w,  aes(x=.data[[col_name_x]], y=.data[[col_name_y]])) 
+      p <- p + geom_bar(stat = "identity", fill = "blue", color = "white")
+      p <- p + geom_vline(xintercept = m, color = "red", linetype = 2, linewidth = 1)
+      #p <- p + coord_flip()
+      p <- p + theme_sjplot2() + labs(x = "", y = "")
+      p
+     save_plot(here("Plots", plotname), height = 10, width = 20)
+    }
+    
+```
+
+
+```{r Bivariate Plots (Categorical Tolerance)}
+      a <- reg.dat$bin.dis
       plot.dat <- reg.dat %>% 
         na.omit() %>% 
         group_by(Age) %>% 
         summarize(y = sum(bin.dis)) %>% 
         mutate(t = table(reg.dat$Age)) %>% 
-        mutate(prop = round(y / t, 3))
+        mutate(prop = round(y / t, 3)) %>% 
+        dplyr::select(c("Age", "prop"))
       plot.dat$Age <- factor(plot.dat$Age, 
                              labels = c("18 - 19", "20 - 24",
                                         "25 - 29", "30 - 34", "35 - 39", "40 - 44",
                                         "45 - 49", "50 - 54", "55 - 59", "60 - 64",
                                         "65 - 69", "70+"))
-      p <- ggplot(data = plot.dat, aes(y = prop, x = Age)) 
-      p <- p + geom_bar(stat = "identity", fill = "blue", color = "white")
-      p <- p + geom_hline(yintercept = mean(reg.dat$bin.dis, na.rm = T), color = "red", linetype = 2, linewidth = 1)
-      p <- p + coord_flip()
-      p <- p + theme_sjplot2() + labs(x = "", y = "")
-      p
-     save_plot(here("Plots", "cat-tol-age.png"))
+      make.bar(plot.dat, x = 2, y = 1, "cat-tol-age.png", m = mean(a, na.rm = T))
+
      
       plot.dat <- reg.dat %>% 
         na.omit() %>% 
         group_by(Race) %>% 
         summarize(y = sum(bin.dis)) %>% 
         mutate(t = table(reg.dat$Race)) %>% 
-        mutate(prop = round(y / t, 3))
-      p <- ggplot(data = plot.dat, aes(y = prop, x = Race)) 
-      p <- p + geom_bar(stat = "identity", fill = "blue", color = "white")
-      p <- p + geom_hline(yintercept = mean(reg.dat$bin.dis, na.rm = T), color = "red", linetype = 2, linewidth = 1)
-      p <- p + coord_flip()
-      p <- p + theme_sjplot2() + labs(x = "", y = "")
-      p
-     save_plot(here("Plots", "cat-tol-race.png"))
-     
-     
+        mutate(prop = round(y / t, 3)) %>% 
+        dplyr::select(c("Race", "prop"))
+
+      make.bar(plot.dat, x = 2, y = 1, "cat-tol-race.png", m = mean(a, na.rm = T))
      
       plot.dat <- reg.dat %>% 
         na.omit() %>% 
         group_by(Gender) %>% 
         summarize(y = sum(bin.dis)) %>% 
         mutate(t = table(reg.dat$Gender)) %>% 
-        mutate(prop = round(y / t, 3))
-      p <- ggplot(data = plot.dat, aes(y = prop, x = Gender)) 
-      p <- p + geom_bar(stat = "identity", fill = "blue", color = "white")
-      p <- p + geom_hline(yintercept = mean(reg.dat$bin.dis, na.rm = T), color = "red", linetype = 2, linewidth = 1)
-      p <- p + scale_y_continuous(limits = c(0, .3))
-      p <- p + coord_flip()
-      p <- p + theme_sjplot2() + labs(x = "", y = "")
-      p
-     save_plot(here("Plots", "cat-tol-gender.png"))
+        mutate(prop = round(y / t, 3)) %>% 
+        dplyr::select(c("Gender", "prop"))
+      make.bar(plot.dat, x = 2, y = 1, "cat-tol-gender.png", m = mean(a, na.rm = T))
+
      
       plot.dat <- reg.dat %>% 
         na.omit() %>% 
         group_by(Educ) %>% 
         summarize(y = sum(bin.dis)) %>% 
         mutate(t = table(reg.dat$Educ)) %>% 
-        mutate(prop = round(y / t, 3))
+        mutate(prop = round(y / t, 3)) %>% 
+        dplyr::select(c("Educ", "prop"))
+
       plot.dat$Educ <- factor(plot.dat$Educ, 
                              labels = c("High School", "2yr. Degree", "Bachelor's", "PhD/Prof."))
-      p <- ggplot(data = plot.dat, aes(y = prop, x = Educ)) 
-      p <- p + geom_bar(stat = "identity", fill = "blue", color = "white")
-      p <- p + geom_hline(yintercept = mean(reg.dat$bin.dis, na.rm = T), color = "red", linetype = 2, linewidth = 1)
-      p <- p + coord_flip()
-      p <- p + theme_sjplot2() + labs(x = "", y = "")
-      p
-     save_plot(here("Plots", "cat-tol-educ.png"))
-     
+       make.bar(plot.dat, x = 2, y = 1, "cat-tol-educ.png", m = mean(a, na.rm = T))
+
       plot.dat <- reg.dat %>% 
         na.omit() %>% 
         group_by(polviews) %>% 
         summarize(y = sum(bin.dis)) %>% 
         mutate(t = table(reg.dat$polviews)) %>% 
-        mutate(prop = round(y / t, 3))
+        mutate(prop = round(y / t, 3)) %>% 
+        dplyr::select(c("polviews", "prop"))
+
       plot.dat$polviews <- factor(plot.dat$polviews, 
                              labels = c("Extremely liberal", "Liberal",
                               "Slightly liberal", "Moderate",
                               "Slightly conservative", "Conservative"))
-      p <- ggplot(data = plot.dat, aes(y = prop, x = polviews)) 
-      p <- p + geom_bar(stat = "identity", fill = "blue", color = "white")
-      p <- p + geom_hline(yintercept = mean(reg.dat$bin.dis, na.rm = T), color = "red", linetype = 2, linewidth = 1)
-      p <- p + coord_flip()
-      p <- p + theme_sjplot2() + labs(x = "", y = "")
-      p
-     save_plot(here("Plots", "cat-tol-pol.png"))
+       make.bar(plot.dat, x = 2, y = 1, "cat-tol-pol.png", m = mean(a, na.rm = T))
+
 ```
 
+```{r Bivariate Plots (N. of Dislikes)}
+      a <- reg.dat$num.dis[!reg.dat$num.dis %in% 0]
+      plot.dat <- reg.dat %>% 
+        na.omit() %>% 
+        dplyr::filter(num.dis > 0) %>% 
+        group_by(Age) %>% 
+        summarize(m = mean(num.dis)) 
+      plot.dat$Age <- factor(plot.dat$Age, 
+                             labels = c("18 - 19", "20 - 24",
+                                        "25 - 29", "30 - 34", "35 - 39", "40 - 44",
+                                        "45 - 49", "50 - 54", "55 - 59", "60 - 64",
+                                        "65 - 69", "70+"))
+      make.bar(plot.dat, x = 2, y = 1, "num-dis-age.png", m = mean(a, na.rm = T))
+     
+      plot.dat <- reg.dat %>% 
+        na.omit() %>% 
+        dplyr::filter(num.dis > 0) %>% 
+        group_by(Race) %>% 
+        summarize(m = mean(num.dis)) 
+      make.bar(plot.dat, x = 2, y = 1, "num-dis-race.png", m = mean(a, na.rm = T))
 
+      plot.dat <- reg.dat %>% 
+        na.omit() %>% 
+        dplyr::filter(num.dis > 0) %>% 
+        group_by(Gender) %>% 
+        summarize(m = mean(num.dis)) 
+      make.bar(plot.dat, x = 2, y = 1, "num-dis-gender.png", m = mean(a, na.rm = T))
 
+     
+      plot.dat <- reg.dat %>% 
+        na.omit() %>% 
+        dplyr::filter(num.dis > 0) %>% 
+        group_by(Educ) %>% 
+        summarize(m = mean(num.dis)) 
+      plot.dat$Educ <- factor(plot.dat$Educ, 
+                             labels = c("High School", "2yr. Degree", 
+                                        "Bachelor's", "PhD/Prof."))
+      make.bar(plot.dat, x = 2, y = 1, "num-dis-educ.png", m = mean(a, na.rm = T))
 
+     
+      plot.dat <- reg.dat %>% 
+        na.omit() %>% 
+        dplyr::filter(num.dis > 0) %>% 
+        group_by(polviews) %>% 
+        summarize(m = mean(num.dis)) 
+      plot.dat$polviews <- factor(plot.dat$polviews, 
+                             labels = c("Extremely liberal", "Liberal",
+                              "Slightly liberal", "Moderate",
+                              "Slightly conservative", "Conservative"))
+      make.bar(plot.dat, x = 2, y = 1, "num-dis-pol.png", m = mean(a, na.rm = T))
+```
 
 ```{r Regression Analysis}
      m1 <- zeroinfl(num.dis ~ Educ + Age + Gender + 
