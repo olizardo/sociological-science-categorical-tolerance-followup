@@ -25,7 +25,6 @@
     gs4_deauth()
     dat <- read_sheet("https://docs.google.com/spreadsheets/d/1r6IcGtlTOaAFHxJYgnuGM6IEiJhaIoDBhxEfRIhZEeI/edit?usp=sharing") 
     dat <- dat[-c(1), ] #getting rid of first row
-    #working.dat <- dat.wrang(dat)
 ```
 
 ```{r Data Wrangling Genres}
@@ -37,7 +36,13 @@
           mutate(bin.dis = if_else(num.dis == 0, 1, 0))
     head(dat.dis)
          reg.dat <- dat.demog(dat) %>% 
-          left_join(dat.dis)
+          left_join(dat.dis) %>% 
+          mutate(Man = if_else(Gender == "Man", 1, 0)) %>% 
+          mutate(Moderate = if_else(polviews < 3 | polviews > 5, 1, 0)) %>% 
+          mutate(Black = if_else(Race == "Black", 1, 0)) %>% 
+          mutate(Age_30_to_49 = if_else(Age > 3 & Age < 8, 1, 0)) %>% 
+          rename(Survey_Year = year, Political_Ideology = polviews, Education = Educ) %>% 
+          mutate(Survey_Year = factor(Survey_Year, labels = c("2021", "2023", "2023")))
 ```
 
 ```{r Univariate Distribution of Dislikes Plot}
@@ -84,7 +89,6 @@
                height = 15, width = 20)
 ```
 
-
 ```{r Bar Plot Function}
     make.bar <-function(w, x, y, plotname, m){
       col_names <- names(w)
@@ -102,8 +106,7 @@
     
 ```
 
-
-```{r Bivariate Plots (Categorical Tolerance)}
+```{r Bivariate Bar Plots (Categorical Tolerance)}
       a <- reg.dat$bin.dis
       plot.dat <- reg.dat %>% 
         na.omit() %>% 
@@ -168,7 +171,7 @@
 
 ```
 
-```{r Bivariate Plots (N. of Dislikes)}
+```{r Bivariate Bar Plots (N. of Dislikes)}
       a <- reg.dat$num.dis[!reg.dat$num.dis %in% 0]
       plot.dat <- reg.dat %>% 
         na.omit() %>% 
@@ -221,12 +224,20 @@
 ```
 
 ```{r Regression Analysis}
-     m1 <- zeroinfl(num.dis ~ Educ + Age + Gender + 
-                         Race + polviews + year |
-                         Educ + Age + Age2 + Gender + Race + polviews + year, 
-                         data = reg.dat
-               )
-     tab_model(m1, transform = NULL, file = here("Tabs", "zinf-reg.html"))
+     m1 <- zeroinfl(num.dis ~ 
+                      Age  + Political_Ideology + Race |
+                      Education + Age_30_to_49 + Man + Moderate + Black + Survey_Year,
+                      data = reg.dat)
+     m2 <- zeroinfl(num.dis ~ 
+                      Age  + Political_Ideology + Race |
+                      Education*Survey_Year + Age_30_to_49*Survey_Year + 
+                      Man*Survey_Year + Moderate*Survey_Year + Black*Survey_Year,
+                      data = reg.dat)
+     tab_model(m1, transform = NULL, file = here("Tabs", "zinf-reg.html"), 
+               auto.label = TRUE, dv.labels = "", 
+               show.zeroinf = TRUE, show.aic = TRUE, show.loglik = TRUE,
+               show.ci = FALSE)
+     webshot(here("Tabs", "zinf-reg.html"), here("Tabs", "zinf-reg.png"))
 ```
 
 
