@@ -33,7 +33,8 @@
           mutate(across(Classical:Metal, function(x) {if_else(x < 3, 1, 0)})) %>% 
           rowwise() %>% 
           mutate(num.dis = sum(c_across(Classical:Metal), na.rm = T)) %>% 
-          ungroup()
+          ungroup() %>% 
+          mutate(bin.dis = if_else(num.dis == 0, 1, 0))
     head(dat.dis)
          reg.dat <- dat.demog(dat) %>% 
           left_join(dat.dis)
@@ -51,10 +52,83 @@
      save_plot(here("Plots", "dis-dist.png"))
 ```
 
+```{r Bivariate Plots (Race)}
+      plot.dat <- reg.dat %>% 
+        na.omit() %>% 
+        group_by(Age) %>% 
+        summarize(y = sum(bin.dis)) %>% 
+        mutate(t = table(reg.dat$Age)) %>% 
+        mutate(prop = round(y / t, 3))
+      plot.dat$Age <- factor(plot.dat$Age, 
+                             labels = c("18 - 19", "20 - 24",
+                                        "25 - 29", "30 - 34", "35 - 39", "40 - 44",
+                                        "45 - 49", "50 - 54", "55 - 59", "60 - 64",
+                                        "65 - 69", "70+"))
+      p <- ggplot(data = plot.dat, aes(y = prop, x = Age)) 
+      p <- p + geom_bar(stat = "identity", fill = "blue", color = "white")
+      p <- p + geom_hline(yintercept = mean(reg.dat$bin.dis, na.rm = T), color = "red", linetype = 2, linewidth = 1)
+      p <- p + coord_flip()
+      p <- p + theme_sjplot2()
+      p
+     save_plot(here("Plots", "cat-tol-age.png"))
+     
+      plot.dat <- reg.dat %>% 
+        na.omit() %>% 
+        group_by(Race) %>% 
+        summarize(y = sum(bin.dis)) %>% 
+        mutate(t = table(reg.dat$Race)) %>% 
+        mutate(prop = round(y / t, 3))
+      p <- ggplot(data = plot.dat, aes(y = prop, x = Race)) 
+      p <- p + geom_bar(stat = "identity", fill = "blue", color = "white")
+      p <- p + geom_hline(yintercept = mean(reg.dat$bin.dis, na.rm = T), color = "red", linetype = 2, linewidth = 1)
+      p <- p + coord_flip()
+      p <- p + theme_sjplot2()
+      p
+     save_plot(here("Plots", "cat-tol-race.png"))
+     
+     
+     
+      plot.dat <- reg.dat %>% 
+        na.omit() %>% 
+        group_by(Gender) %>% 
+        summarize(y = sum(bin.dis)) %>% 
+        mutate(t = table(reg.dat$Gender)) %>% 
+        mutate(prop = round(y / t, 3))
+      p <- ggplot(data = plot.dat, aes(y = prop, x = Gender)) 
+      p <- p + geom_bar(stat = "identity", fill = "blue", color = "white")
+      p <- p + geom_hline(yintercept = mean(reg.dat$bin.dis, na.rm = T), color = "red", linetype = 2, linewidth = 1)
+      p <- p + coord_flip()
+      p <- p + theme_sjplot2()
+      p
+     save_plot(here("Plots", "cat-tol-gender.png"))
+     
+      plot.dat <- reg.dat %>% 
+        na.omit() %>% 
+        group_by(polviews) %>% 
+        summarize(y = sum(bin.dis)) %>% 
+        mutate(t = table(reg.dat$polviews)) %>% 
+        mutate(prop = round(y / t, 3))
+      plot.dat$polviews <- factor(plot.dat$polviews, 
+                             labels = c("Extremely liberal", "Liberal",
+                              "Slightly liberal", "Moderate",
+                              "Slightly conservative", "Conservative"))
+      p <- ggplot(data = plot.dat, aes(y = prop, x = polviews)) 
+      p <- p + geom_bar(stat = "identity", fill = "blue", color = "white")
+      p <- p + geom_hline(yintercept = mean(reg.dat$bin.dis, na.rm = T), color = "red", linetype = 2, linewidth = 1)
+      p <- p + coord_flip()
+      p <- p + theme_sjplot2()
+      p
+     save_plot(here("Plots", "cat-tol-pol.png"))
+```
+
+
+
+
+
 ```{r Regression Analysis}
      m1 <- zeroinfl(num.dis ~ Educ + Age + Gender + 
                          Race + polviews + year |
-                         Age + Age2 + Race + year, 
+                         Age + Age2 + Race + polviews + year, 
                          data = reg.dat
                )
      tab_model(m1, transform = NULL, file = here("Tabs", "zinf-reg.html"))
