@@ -1,0 +1,66 @@
+---
+  title: "Sociological Science Categorical Tolerance Follow-up"
+  author: "Omar Lizardo"
+  date: "`r Sys.Date()`"
+---
+
+# Setup
+```{r setup, include=FALSE}
+     knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+     library(boot)
+     library(conflicted)
+     library(here)
+     library(googlesheets4)
+     library(ggplot2)
+     library(pscl)
+     library(sjPlot)
+     library(tidyverse)
+     library(webshot)
+     source(here("Functions", "dat.demog.R"))
+     source(here("Functions", "dat.genres.R"))
+```
+
+# Data Wrangling
+```{r Getting and wrangling data}
+    gs4_deauth()
+    dat <- read_sheet("https://docs.google.com/spreadsheets/d/1r6IcGtlTOaAFHxJYgnuGM6IEiJhaIoDBhxEfRIhZEeI/edit?usp=sharing") 
+    dat <- dat[-c(1), ] #getting rid of first row
+    #working.dat <- dat.wrang(dat)
+```
+
+```{r Data Wrangling Genres}
+    dat.dis <- dat.genres(dat)$dat.g %>%
+          mutate(across(Classical:Metal, function(x) {if_else(x < 3, 1, 0)})) %>% 
+          rowwise() %>% 
+          mutate(num.dis = sum(c_across(Classical:Metal), na.rm = T)) %>% 
+          ungroup()
+    head(dat.dis)
+         reg.dat <- dat.demog(dat) %>% 
+          left_join(dat.dis)
+```
+
+```{r Univariate Distribution of Dislikes Plot}
+     d <- round(table(dat.dis$num.dis)/nrow(dat.dis), 2)[1:11]
+     plot.dat <- data.frame(cbind(count = 0:10, prop = d))
+     p <- ggplot(data = plot.dat, aes(x = count, y = prop)) 
+     p <- p + geom_line(color = "blue")
+     p <- p + geom_point(size = 4, color = "blue")
+     p <- p + scale_x_continuous(limits = c(0,10), n.breaks = 11)
+     p <- p + theme_sjplot2()
+     p
+     save_plot(here("Plots", "dis-dist.png"))
+```
+
+```{r Regression Analysis}
+     m1 <- zeroinfl(num.dis ~ Educ + Age + Gender + 
+                         Race + polviews + year |
+                         Age + Age2 + Race + year, 
+                         data = reg.dat
+               )
+     tab_model(m1, transform = NULL, file = here("Tabs", "zinf-reg.html"))
+```
+
+
+
+
+
