@@ -138,6 +138,29 @@
           save_kable(here("Tabs", "desc-tab2.html"))
 ```
 
+```{r}
+  dat.g <- reg.dat[, c("id", "Classical", "Country", "Disco",
+                            "Jazz", "Musicals", "Pop", "R_and_B",
+                            "Rap", "Reggae", "Rock", "EDM", "Metal")] %>% 
+    pivot_longer(
+      cols = c(2:13),
+      names_to = "genre",
+      values_to = "Dislike"
+    ) 
+  t <- round(table(dat.g$genre, dat.g$Dislike)/nrow(reg.dat), 2) * 100
+  t.w <- left_join(dat.g, reg.dat[, c("id", "weight")])
+  t.w <- round(wtd.table(t.w$genre, t.w$Dislike, weights = t.w$weight)/nrow(reg.dat), 2) * 100
+  t <- data.frame(d = t[, 2], wd = t.w[, 2]) %>% 
+    kbl(caption = "", format = "html", align = "c", 
+        col.names = c("Unweighted", "Weighted")) %>% 
+          kable_classic_2(full_width = F, 
+          html_font = "Garamond", font_size = 20) %>% 
+          pack_rows("% Disliked", 1, 12) %>% 
+          save_kable(here("Tabs", "desc-tab3.html"))
+  
+```
+
+
 # Plot Functions
 ```{r Plot Data Wrangling}
       make.plot.dat <- function(x) {

@@ -95,6 +95,16 @@ Lindblom, T. (2022). Growing openness or creeping intolerance? Cultural taste or
 :::
 ::::
 
+## Categorical Tolerance in the U.S. Today
+:::: {.columns}
+::: {.column width="50%"}
+{{< include Tabs/desc-tab1.html >}}
+:::
+::: {.column width="50%"}
+{{< include Tabs/desc-tab3.html >}}
+:::
+::::
+
 
 ## Categorical Tolerance in the U.S. Today
 :::: {.columns}
