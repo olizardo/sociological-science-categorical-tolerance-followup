@@ -1,0 +1,337 @@
+---
+title: "The Forward March of Categorical Tolerance in the United States?"
+author: "Omar Lizardo"
+institute: "*University of California, Los Angeles*"
+date: "`r Sys.Date()`"
+slide-number: true
+show-slide-number: print
+slide-level: 2
+format:
+  revealjs:
+    incremental: false 
+    theme: simple 
+    smaller: true
+    footer: "https://github.com/olizardo/sociological-science-categorical-tolerance-followup"
+---
+
+## Categorical Tolerance As a Social Fact
+
+- What is **categorical tolerance**?
+  - Refusal to report dislikes in survey data on cultural (usually musical) tastes
+  - Anchoring at "neutral" or "mixed feelings"
+- Riff on Bryson (1996) who used musical dislikes as an extension of the notion of political tolerance into the cultural realm
+
+:::aside
+Bryson, B. (1996). " Anything but heavy metal": Symbolic exclusion and musical dislikes. *American Sociological Review*, 884-899.
+:::
+
+## Categorical Tolerance As a Social Fact
+
+- What is **categorical tolerance**?
+  - Refusal to report dislikes in survey data on cultural (usually musical) tastes
+  - Anchoring at "neutral" or "mixed feelings"
+- Riff on Bryson (1996) who used musical dislikes as an extension of the notion of political tolerance into the cultural realm
+
+- More prosaically:  
+  - People with zero dislikes in a cultural taste survey (categorical tolerants)
+  - Excess zeros in the count distribution dislikes at the population level
+  - Structural zeros in a hurdle count model
+  
+:::aside
+Bryson, B. (1996). " Anything but heavy metal": Symbolic exclusion and musical dislikes. *American Sociological Review*, 884-899.
+:::
+
+## Categorical Tolerance in the U.S.
+![From: Lizardo, O., & Skiles, S. (2016). The end of symbolic exclusion? The rise of “categorical tolerance” in the musical tastes of Americans: 1993–2012. *Sociological Science*, 3, 85-108.](Plots/Figure1.png)
+
+## Subsequent Work on Categorical Tolerance
+::::{.columns}
+::: {.column width="30%"}
+![](lindbloom.png)
+:::
+::: {.column width="70%"}
+- One comparable study by Lindbloom (2022)
+- Two wave cross-section: 2007 - 2018
+- Finnish Context
+- 13 Musical Genres
+  - Some, but not perfect overlap with Lizardo & Skiles (2016)
+  
+:::
+::::
+
+:::aside
+Lindblom, T. (2022). Growing openness or creeping intolerance? Cultural taste orientations and tolerant social attitudes in Finland, 2007–2018. *Poetics*, 93, 101663.
+:::
+
+## Subsequent Work on Categorical Tolerance
+::::{.columns}
+::: {.column width="30%"}
+![](lindbloom.png)
+:::
+::: {.column width="70%"}
+- Findings: 
+  - Categorical tolerance (CT) increases over time:
+    - 14% versus 20%
+  - No connection between CT and political and social attitudes
+  - Only consistent predictor of CT is age:
+    - Younger more likely to belong to CT group
+    - Similar to Lizardo & Skiles (2016)
+  
+:::
+::::
+
+:::aside
+Lindblom, T. (2022). Growing openness or creeping intolerance? Cultural taste orientations and tolerant social attitudes in Finland, 2007–2018. *Poetics*, 93, 101663.
+:::
+
+
+## Categorical Tolerance in the U.S. Today
+:::: {.columns}
+::: {.column width="50%"}
+{{< include Tabs/desc-tab1.html >}}
+:::
+::: {.column width="50%"}
+{{< include Tabs/desc-tab2.html >}}
+:::
+::::
+
+
+## Categorical Tolerance in the U.S. Today
+:::: {.columns}
+::: {.column width="45%"}
+- Unweighted distribution over-estimates categorical tolerance effect
+- Weighted distribution similar to that observed in 2012 data
+  - 2012 SSI Data: 
+    - 16% Categorical Tolerants
+  - 2021/2023 Prolific Data: 
+    - 20% Categorical Tolerants (Unweighted)
+    - 14% Categorical Tolerants (Weighted)
+:::
+::: {.column width="55%"}
+![Data from 2021/2023 (Pooled)](Plots/uni-dist-by-weighted.png)
+:::
+::::
+
+## Differences in Two Data Collection Waves
+:::: {.columns}
+::: {.column width="45%"}
+- Most of the categorical tolerance over-estimation comes from smaller data collection wave in 2021
+  - Middle of Covid Pandemic
+- Categorical Tolerance 2021:
+  - Unweighted: 27%
+  - Weighted: 9%
+- Categorical Tolerance 2023:
+  - Unweighted: 16%
+  - Weighted: 17% 
+:::
+::: {.column width="55%"}
+![Data from 2021/2023](Plots/uni-dist-by-weighted-by-year.png)
+:::
+::::
+
+
+## Socio-Demographic Correlates 
+### Categorical Tolerance and Age
+:::: {.columns}
+::: {.column width="65%"}
+![](Plots/cat-tol-age.png)
+:::
+::: {.column width="35%"}
+- Young people over-represented among categorical tolerants
+- Old people under-represented
+- Consistent with Lizardo & Skiles (2016)
+:::
+::::
+
+## Socio-Demographic Correlates 
+### Categorical Tolerance and Race
+:::: {.columns}
+::: {.column width="65%"}
+![](Plots/cat-tol-race.png)
+:::
+::: {.column width="35%"}
+- White people under-represented among categorical tolerants
+  - 58% versus 40% 
+  
+- Black people over-represented 
+    - 13% versus 23% 
+- People identifying as "multiracial" also over-represented
+  - Consistent with Lizardo & Skiles (2016)
+:::
+::::
+
+
+## Socio-Demographic Correlates 
+### Categorical Tolerance and Gender
+:::: {.columns}
+::: {.column width="65%"}
+![](Plots/cat-tol-gender.png)
+:::
+::: {.column width="35%"}
+- Strong gender effect 
+- Women under-represented among categorical tolerants
+- Men over-represented
+:::
+::::
+
+## Socio-Demographic Correlates 
+### Categorical Tolerance and Education
+:::: {.columns}
+::: {.column width="65%"}
+![](Plots/cat-tol-educ.png)
+:::
+::: {.column width="35%"}
+- Not much of an education effect on categorical tolerance
+  - Consistent with Lizardo & Skiles (2016)
+
+:::
+::::
+
+## Socio-Demographic Correlates 
+### Categorical Tolerance and Political Ideology
+:::: {.columns}
+::: {.column width="70%"}
+![](Plots/cat-tol-pol.png)
+:::
+::: {.column width="30%"}
+- Not much of a Political Ideology effect
+  - Not considered by Lizardo & Skiles (2016)
+  - SSI 2012 Data lacked information on Political Ideology
+:::
+::::
+
+
+## Socio-Demographic Correlates 
+### Graded Tolerance and Age
+:::: {.columns}
+::: {.column width="65%"}
+![](Plots/num-dis-age.png)
+:::
+
+::: {.column width="35%"}
+- Dislikes increase with age
+- Not much difference between weighted and unweighted data
+  - Especially at the old end
+  - No Surprise there!
+:::
+::::
+
+## Socio-Demographic Correlates 
+
+### Graded Tolerance and Education
+:::: {.columns}
+::: {.column width="65%"}
+![](Plots/num-dis-educ.png)
+:::
+
+::: {.column width="35%"}
+- Curvilinear pattern (weighted data)
+- Symbolic Exclusion higher at low and high end of the status ladder
+- Middle status tolerance effect
+- Not particularly strong
+:::
+::::
+
+
+
+## Socio-Demographic Correlates 
+### Graded Tolerance and Political Ideology
+:::: {.columns}
+::: {.column width="65%"}
+![](Plots/num-dis-pol.png)
+:::
+
+::: {.column width="35%"}
+- Strong ideology effect on graded tolerance
+  - In contrast to categorical tolerance
+- Expected direction:
+  - Liberals more tolerant
+  - Conservatives more likely to engage in symbolic exclusion
+  - Pattern more salient in weighted data
+:::
+::::
+
+## Socio-Demographic Correlates 
+### Graded Tolerance and Race
+:::: {.columns}
+::: {.column width="65%"}
+![](Plots/num-dis-race.png)
+:::
+
+::: {.column width="35%"}
+- Race effect on graded exclusion
+- White/non-White Contrast
+- White people more likely to engage in symbolic exclusion
+:::
+::::
+
+## Socio-Demographic Correlates 
+### Graded Tolerance and Gender
+:::: {.columns}
+::: {.column width="65%"}
+![](Plots/num-dis-gender.png)
+:::
+
+::: {.column width="35%"}
+- Not much of a gender effect on graded exclusion
+- Non/binary v. Everyone Else contrast in weighted data
+:::
+::::
+
+## Zero-Inflated Poisson Regression Results 
+:::: {.columns}
+:::{.column width="40%"}
+{{< include Tabs/zinf-reg.html >}}
+:::
+:::{.column width="60%"}
+- Categorical Tolerance (Zero Inflation)
+  - Black and Multiracial Positive Effect
+    - Hispanic Not Statistically Signficant
+  - Generational Effect
+     - Old versus Young
+  - Gender Effect
+     - Women Less Likely to be Categorically Tolerant
+  - Period Effect
+     - Covid Depressed Categorical Tolerance 
+     - Effect Evident Once Sample is Re-weighted
+
+:::
+::::
+
+## Zero-Inflated Poisson Regression Results 
+:::: {.columns}
+:::{.column width="40%"}
+{{< include Tabs/zinf-reg.html >}}
+:::
+:::{.column width="60%"}
+- Graded Exclusion (Count Model)
+  - Age and Political Ideology Effects in Expected Direction
+    - Older, more conservative more exclusion
+  - Education Effect (Weighted Data)
+    - More Symbolic Exclusion at the Extreme Low and High Ends
+  - Race Effect in Expected Direction
+    - White people more likely to dislike
+
+:::
+::::
+
+## Conclusions
+- Categorical Tolerance continues to be a social fact!
+  - Highlights value of replication of previous work using newer/different data
+- Similarity in results with previous work in the U.S. re-assuring
+  - CTs are non-white and young today as they were in 2012
+- Similarity with results from a different national contemporary national case suggest generic not case-specific mechanisms
+  - Especially with regard to the cohort/age effect
+  - Race effect could be specific to the U.S. Context
+- Need work using other methodological strategies (interview, experimental, computational) to crack the puzzle
+
+
+
+## ZIP Regression Appendix 
+
+{{< include Tabs/zinf-reg-appendix.html >}}
+
+
+
+
+

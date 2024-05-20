@@ -7,27 +7,32 @@
 # Setup
 ```{r setup, include=FALSE}
      knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+     library(anesrake)
      library(boot)
      library(conflicted)
      library(here)
      library(googlesheets4)
      library(ggplot2)
+     library(kableExtra)
      library(pscl)
+     library(questionr)
      library(sjPlot)
      library(tidyverse)
      library(webshot)
      source(here("Functions", "dat.demog.R"))
      source(here("Functions", "dat.genres.R"))
+     conflicted::conflicts_prefer(questionr::wtd.table)
+     conflicted::conflicts_prefer(dplyr::summarize)
 ```
 
-# Data Wrangling
+# Wrangling
 ```{r Getting and wrangling data}
     gs4_deauth()
     dat <- read_sheet("https://docs.google.com/spreadsheets/d/1r6IcGtlTOaAFHxJYgnuGM6IEiJhaIoDBhxEfRIhZEeI/edit?usp=sharing") 
     dat <- dat[-c(1), ] #getting rid of first row
 ```
 
-```{r Data Wrangling Genres}
+```{r Data Wrangling}
     dat.dis <- dat.genres(dat)$dat.g %>%
           mutate(across(Classical:Metal, function(x) {if_else(x < 3, 1, 0)})) %>% 
           rowwise() %>% 
@@ -37,207 +42,382 @@
     head(dat.dis)
          reg.dat <- dat.demog(dat) %>% 
           left_join(dat.dis) %>% 
-          mutate(Man = if_else(Gender == "Man", 1, 0)) %>% 
-          mutate(Moderate = if_else(polviews < 3 | polviews > 5, 1, 0)) %>% 
+          rename(Survey_Year = year, Political_Ideology = polviews, Education = Educ) %>%
           mutate(Black = if_else(Race == "Black", 1, 0)) %>% 
-          mutate(Age_30_to_49 = if_else(Age > 3 & Age < 8, 1, 0)) %>% 
-          rename(Survey_Year = year, Political_Ideology = polviews, Education = Educ) %>% 
-          mutate(Survey_Year = factor(Survey_Year, labels = c("2021", "2023", "2023")))
+          mutate(Hisp = if_else(Race == "Hisp.", 1, 0)) %>% 
+          mutate(Asian = if_else(Race == "Asian", 1, 0)) %>% 
+          mutate(White = if_else(Race == "White", 1, 0)) %>%
+          mutate(Mult = if_else(Race == "Mult.", 1, 0)) %>% 
+          mutate(Native = if_else(Race == "Native/Other", 1, 0)) %>% 
+          mutate(Woman = if_else(Gender == "Woman", 1, 0)) %>% 
+          mutate(Age.n = as.numeric(Age)) %>% 
+          mutate(Young = if_else(Age.n > 1 & Age.n < 5, 1, 0)) %>% 
+          mutate(Old = if_else(Age.n > 9, 1, 0)) %>% 
+          mutate(Educ.n = as.numeric(Education)) %>% 
+          mutate(Low.Educ = if_else(Educ.n == 1, 1, 0)) %>% 
+          mutate(Mid.Educ = if_else(Educ.n == 2 | Educ.n == 3, 1, 0)) %>% 
+          mutate(Hi.Educ = if_else(Educ.n == 4, 1, 0)) %>% 
+          mutate(polviews.n = as.numeric(Political_Ideology)) %>% 
+          mutate(Moderate = if_else(polviews.n == 3 | polviews.n == 4, 1, 0)) %>% 
+          mutate(Survey_Year = factor(Survey_Year, labels = c("2021", "2023", "2023"))) %>% 
+          mutate(Age = factor(Age, 
+                             labels = c("18 - 19", "20 - 24",
+                                        "25 - 29", "30 - 34", "35 - 39", "40 - 44",
+                                        "45 - 49", "50 - 54", "55 - 59", "60 - 64",
+                                        "65 - 69", "70+"))) %>% 
+         mutate(Education = factor(Education, labels = c("High School", "Associate", "Bachelor", "Grad/Prof."))) %>% 
+         mutate(Political_Ideology = factor(Political_Ideology, 
+                             labels = c("Extremely liberal", "Liberal",
+                              "Slightly liberal", "Moderate",
+                              "Slightly conservative", "Conservative")))
 ```
 
-```{r Univariate Distribution of Dislikes Plot}
-     d <- round(table(dat.dis$num.dis)/nrow(dat.dis), 2)[1:11]
-     plot.dat <- data.frame(cbind(count = 0:10, prop = d))
-     p <- ggplot(data = plot.dat, aes(x = count, y = prop)) 
-     p <- p + geom_vline(xintercept = 1, color = "red", linetype = 2, linewidth = .75)
-     p <- p + geom_line(color = "blue")
-     p <- p + geom_point(size = 4, color = c("red", rep("blue", 10)))
-     p <- p + scale_x_continuous(limits = c(0,10), n.breaks = 11)
-     p <- p + scale_y_continuous(limits = c(0, .25))
-     p <- p + theme_sjplot2() + labs(x = "N. of Dislikes", y = "")
-     p
-     save_plot(here("Plots", "dis-dist.png"), 
-               height = 15, width = 20)
+# Weighting
+```{r Target Proportions}
+    Race <- c(0.589, 0.136, 0.063, 0.191, 0.03, 0.016)
+    names(Race) <- c("White", "Black", "Asian", "Hisp.", "Mult.", "Native/Other")
+    Age <- c(0.034, 0.084, 0.089, 0.088, 0.086, 0.080, 0.081, 0.082, 0.086, 0.082, 0.069, 0.138)
+    names(Age) <- c("18 - 19", "20 - 24", "25 - 29", "30 - 34", "35 - 39", "40 - 44", "45 - 49", "50 - 54", "55 - 59", "60 - 64", "65 - 69", "70+")
+    Education <- c(0.58, 0.09, 0.21, 0.13)
+    names(Education) <- c("High School", "Associate", "Bachelor", "Grad/Prof.")
+    Gender <- c(.495, .495, .01)
+    names(Gender) <- levels(reg.dat$Gender)
+    target <- list(Race = Race, Education = Education, Age = Age, Gender = Gender)
 ```
 
-```{r Univariate Distribution of Dislikes Plot (by year)}
-    a <- dplyr::filter(reg.dat, year == "06 21")
-    b <- dplyr::filter(reg.dat, year != "06 21")
-    c <- round(table(a$num.dis)/nrow(a), 2)[1:11]
-    d <- round(table(b$num.dis)/nrow(b), 2)[1:11]
-    plot.dat <- data.frame(cbind(count = 0:10, y.2021 = c, y.2023 = d)) %>% 
-      pivot_longer(
-      cols = c(2:3),
-      names_to = "Year",
-      values_to = "Prop"
-    ) %>% 
-      mutate(Year = factor(Year, labels = c("2021", "2023"))) %>% 
-      mutate(count = as.integer(count))
-    head(plot.dat)
-
-     p <- ggplot(data = plot.dat, 
-                 aes(x = count, y = Prop, color = Year, group = Year)) 
-     p <- p + geom_vline(xintercept = 1, color = "red", linetype = 2, linewidth = .75)
-     p <- p + geom_line(linewidth = 1) + geom_point(size = 5)
-     p <- p + scale_x_continuous(limits = c(0,10), n.breaks = 11)
-     p <- p + scale_y_continuous(limits = c(0, .3))
-     p <- p + theme_sjplot2() + labs(x = "N. of Dislikes", y = "")
-     p <- p + scale_color_manual(values = c("red", "blue"))
-     p <- p + theme(legend.position = "top")
-     p
-     save_plot(here("Plots", "dis-dist-year.png"), 
-               height = 15, width = 20)
+```{r Creating weights via raking}
+    rake.dat <- as.data.frame(reg.dat)
+    raking <- anesrake::anesrake(target, rake.dat, rake.dat$id, 
+                                 maxit = 5000, pctlim = 0.025,
+                                 choosemethod = "average")
+    reg.dat$weight <- raking$weightvec
+    reg.dat.21 <- dplyr::filter(reg.dat, Survey_Year == "2021")
+    reg.dat.23 <- dplyr::filter(reg.dat, Survey_Year == "2023")
 ```
 
-```{r Bar Plot Function}
-    make.bar <-function(w, x, y, plotname, m){
-      col_names <- names(w)
-      col_name_x <- col_names[[x]]
-      col_name_y <- col_names[[y]]
-      
-      p <- ggplot(data = w,  aes(x=.data[[col_name_x]], y=.data[[col_name_y]])) 
-      p <- p + geom_bar(stat = "identity", fill = "blue", color = "white")
-      p <- p + geom_vline(xintercept = m, color = "red", linetype = 2, linewidth = 1)
-      #p <- p + coord_flip()
-      p <- p + theme_sjplot2() + labs(x = "", y = "")
+# Descriptive Tables
+```{r Descriptive sociodemographics table}
+     prop <- function(x, labs) {
+          f <- table(as.numeric(x))
+          p <- round(f/sum(f), 3) * 100
+          w.f <- wtd.table(as.numeric(x), weights = reg.dat$weight)
+          w.p <- round(w.f/sum(w.f), 3) * 100
+          rownames(f) <- labs
+          z <- as.matrix(cbind(f, p, w.p)) 
+          colnames(z) <- c("N. of Cases", "Per.", "Weighted Per.")
+     return(z)
+     }
+
+     gender.tab <- prop(reg.dat$Gender, 
+                        c("Man", "Woman", "Other/Non-binary"))
+     educ.tab <- prop(reg.dat$Education, 
+                      c("High School", "Associate", "Bachelors", "PhD/Prof."))
+     age.tab <- prop(reg.dat$Age, c("18 - 19", "20 - 24", "25 -29", 
+                                         "30 - 34", "35 - 39", "40 - 44", 
+                                         "45 - 49", "50 - 54", "55 - 59", 
+                                         "60 - 64", "65 - 69", "70+"))
+     pol.tab <- prop(reg.dat$Political_Ideology,
+                     rownames(table(reg.dat$Political_Ideology)))
+     race.tab <- prop(reg.dat$Race, rownames(table(reg.dat$Race)))
+     year.tab <- prop(reg.dat$Survey_Year, c("2021", "2023"))
+     tab1 <- rbind(educ.tab, race.tab, gender.tab) %>% 
+          kbl(caption = "", format = "html", align = "c") %>% 
+          kable_classic_2(full_width = F, 
+                          html_font = "Garamond", font_size = 20) %>% 
+          pack_rows("Education", 1, 4) %>% 
+          pack_rows("Ethnic/Racial I.D.", 5, 10) %>% 
+          pack_rows("Gender I.D.", 11, 13) %>% 
+          save_kable(here("Tabs", "desc-tab1.html"))
+
+     tab2 <- rbind(age.tab, year.tab) %>% 
+          kbl(caption = "", format = "html", align = "c") %>% 
+          kable_classic_2(full_width = F, 
+                          html_font = "Garamond", font_size = 20) %>% 
+          pack_rows("Age Groups", 1, 12) %>% 
+          pack_rows("Survey Year", 13, 14) %>%   
+          save_kable(here("Tabs", "desc-tab2.html"))
+```
+
+# Plot Functions
+```{r Plot Data Wrangling}
+      make.plot.dat <- function(x) {
+        l <- length(table(x))
+        p.u <- wtd.table(x, weights = reg.dat$weight)/sum(wtd.table(x, weights = reg.dat$weight))
+        p.w <- wtd.table(x, reg.dat$bin.dis, weights = reg.dat$weight)
+        p.w <- p.w[, 2]/sum(p.w[, 2])
+        plot.dat <- data.frame(cbind(p.u = round(p.u, 3), 
+                                     p.w = round(p.w, 3), 
+                                     x.var = names(p.u))) %>% 
+        pivot_longer(
+        cols = c(1:2),
+        names_to = "Weighted",
+        values_to = "Prop"
+        ) %>% 
+        mutate(Weighted = factor(Weighted, labels = c("Sample Prop. (Weighted)", "Obs. Cat. Tol. (Weighted)"))) %>% 
+        mutate(Prop = as.numeric(Prop)) 
+      }
+
+    make.plot.dat.n <- function(x) {
+        w.dat <- reg.dat %>% 
+          dplyr::filter(num.dis > 0) %>% 
+          group_by(.data[[x]]) %>% 
+          summarize(w.m = weighted.mean(num.dis, weight)) 
+        plot.dat <- reg.dat %>% 
+          dplyr::filter(num.dis > 0) %>% 
+          group_by(.data[[x]]) %>% 
+          summarize(u.m = mean(num.dis)) %>% 
+          left_join(w.dat) %>% 
+          pivot_longer(
+          cols = c(2:3),
+          names_to = "Weighted",
+          values_to = "n.dis"
+          ) %>% 
+          mutate(Weighted = factor(Weighted, labels = c("Unweighted", "Weighted"))) %>% 
+          rename(x.var = 1) %>% 
+          na.omit()
+          }
+```
+
+```{r Plot Making}
+    bivar.line.plot <- function(x, alpha = .2) {
+      dat <- make.plot.dat(x)
+      l <- length(unique(dat$x.var))
+      o <- levels(x)
+      p <- ggplot(data = dat, aes(x = factor(x.var, levels = o), y = Prop, 
+                                       color = Weighted, group = Weighted))
+      p <- p + geom_line(alpha = c(rep(alpha, l), rep(1, l))) 
+      p <- p + geom_point(size = 3, alpha = rep(c(alpha, 1), l))
+      p <- p + theme_minimal() + labs(x = "", y = "")
+      p <- p + theme(legend.position = "bottom", 
+                     legend.title = element_blank(),
+                     axis.line.x = element_blank(), 
+                     axis.line.y = element_blank(),
+                     legend.text = element_text(size = 10),
+                     axis.text.y = element_text(size = 12),
+                     axis.text.x = element_text(size = 12))
+      p <- p + scale_color_manual(values = c("blue", "blue"))
+      p <- p + guides(color = guide_legend (override.aes = list(alpha = c(alpha, 1))))
       p
-     save_plot(here("Plots", plotname), height = 10, width = 20)
+    }
+
+    bivar.line.plot.d <- function(x, alpha = .2) {
+      dat <- make.plot.dat.n(x)
+      l <- length(unique(dat$x.var))
+      p <- ggplot(data = dat, aes(x = x.var, y = n.dis, 
+                                       color = Weighted, group = Weighted))
+      p <- p + geom_line(alpha = c(rep(alpha, l), rep(1, l))) 
+      p <- p + geom_point(size = 3, alpha = rep(c(alpha, 1), l))
+      p <- p + theme_minimal() + labs(x = "", y = "Mean N. of Dislikes (Excluding Categorical Tolerants)")
+      p <- p + theme(legend.position = "bottom", 
+                     legend.title = element_blank(),
+                     axis.line.x = element_blank(), 
+                     axis.line.y = element_blank(),
+                     axis.text.x = element_text(size = 12))
+      p <- p + scale_color_manual(values = c("blue", "blue"))
+      p <- p + guides(color = guide_legend (override.aes = list(alpha = c(alpha, 1))))
+      p <- p + ylim(2.5, 4.75)
+      p
     }
     
+    bivar.bar.plot <- function(x, alpha = .1) {
+      dat <- make.plot.dat(x)
+      l <- length(unique(dat$x.var))
+      p <- ggplot(data = dat, aes(x = x.var, y = Prop, 
+                                       fill = Weighted, 
+                                       group = Weighted))
+      p <- p + geom_col(position = "dodge", alpha = rep(c(alpha, 1), l), color = "white")
+      p <- p + theme_minimal() + labs(x = "", y = "")
+      p <- p + theme(legend.position = "bottom", 
+                     legend.title = element_blank(),
+                     legend.text = element_text(size = 12),
+                     axis.text.y = element_text(size = 12),
+                     axis.text.x = element_text(size = 12))
+      p <- p + scale_fill_manual(values = c("blue", "blue")) + coord_flip()
+      p <- p + guides(fill = guide_legend (override.aes = list(alpha = c(alpha, 1))))
+    p
+    }
+    
+    bivar.bar.plot.d <- function(x, alpha = .1) {
+      dat <- make.plot.dat.n(x)
+      l <- length(unique(dat$x.var))
+      p <- ggplot(data = dat, aes(x = x.var, y = n.dis, 
+                                       fill = Weighted, 
+                                       group = Weighted))
+      p <- p + geom_col(position = "dodge", alpha = rep(c(alpha, 1), l), color = "white")
+      p <- p + theme_minimal() + labs(x = "", y = "Mean N. of Dislikes (Excluding Categorical Tolerants)")
+      p <- p + theme(legend.position = "bottom", 
+                     legend.title = element_blank(),
+                     legend.text = element_text(size = 12),
+                     axis.text.y = element_text(size = 12),
+                     axis.text.x = element_text(size = 12))
+      p <- p + scale_fill_manual(values = c("blue", "blue")) + coord_flip()
+      p <- p + guides(fill = guide_legend (override.aes = list(alpha = c(alpha, 1))))
+      p
+    }
 ```
 
-```{r Bivariate Bar Plots (Categorical Tolerance)}
-      a <- reg.dat$bin.dis
-      plot.dat <- reg.dat %>% 
-        na.omit() %>% 
-        group_by(Age) %>% 
-        summarize(y = sum(bin.dis)) %>% 
-        mutate(t = table(reg.dat$Age)) %>% 
-        mutate(prop = round(y / t, 3)) %>% 
-        dplyr::select(c("Age", "prop"))
-      plot.dat$Age <- factor(plot.dat$Age, 
-                             labels = c("18 - 19", "20 - 24",
-                                        "25 - 29", "30 - 34", "35 - 39", "40 - 44",
-                                        "45 - 49", "50 - 54", "55 - 59", "60 - 64",
-                                        "65 - 69", "70+"))
-      make.bar(plot.dat, x = 2, y = 1, "cat-tol-age.png", m = mean(a, na.rm = T))
-
-     
-      plot.dat <- reg.dat %>% 
-        na.omit() %>% 
-        group_by(Race) %>% 
-        summarize(y = sum(bin.dis)) %>% 
-        mutate(t = table(reg.dat$Race)) %>% 
-        mutate(prop = round(y / t, 3)) %>% 
-        dplyr::select(c("Race", "prop"))
-
-      make.bar(plot.dat, x = 2, y = 1, "cat-tol-race.png", m = mean(a, na.rm = T))
-     
-      plot.dat <- reg.dat %>% 
-        na.omit() %>% 
-        group_by(Gender) %>% 
-        summarize(y = sum(bin.dis)) %>% 
-        mutate(t = table(reg.dat$Gender)) %>% 
-        mutate(prop = round(y / t, 3)) %>% 
-        dplyr::select(c("Gender", "prop"))
-      make.bar(plot.dat, x = 2, y = 1, "cat-tol-gender.png", m = mean(a, na.rm = T))
-
-     
-      plot.dat <- reg.dat %>% 
-        na.omit() %>% 
-        group_by(Educ) %>% 
-        summarize(y = sum(bin.dis)) %>% 
-        mutate(t = table(reg.dat$Educ)) %>% 
-        mutate(prop = round(y / t, 3)) %>% 
-        dplyr::select(c("Educ", "prop"))
-
-      plot.dat$Educ <- factor(plot.dat$Educ, 
-                             labels = c("High School", "2yr. Degree", "Bachelor's", "PhD/Prof."))
-       make.bar(plot.dat, x = 2, y = 1, "cat-tol-educ.png", m = mean(a, na.rm = T))
-
-      plot.dat <- reg.dat %>% 
-        na.omit() %>% 
-        group_by(polviews) %>% 
-        summarize(y = sum(bin.dis)) %>% 
-        mutate(t = table(reg.dat$polviews)) %>% 
-        mutate(prop = round(y / t, 3)) %>% 
-        dplyr::select(c("polviews", "prop"))
-
-      plot.dat$polviews <- factor(plot.dat$polviews, 
-                             labels = c("Extremely liberal", "Liberal",
-                              "Slightly liberal", "Moderate",
-                              "Slightly conservative", "Conservative"))
-       make.bar(plot.dat, x = 2, y = 1, "cat-tol-pol.png", m = mean(a, na.rm = T))
-
+# Plots
+## Univariate
+### Univariate Data Wrangling
+```{r Univariate Distribution of Dislikes Data}
+     d.u <- round(table(reg.dat$num.dis)/nrow(reg.dat), 2)[1:11]
+     d.u.21 <- round(table(reg.dat.21$num.dis)/nrow(reg.dat.21), 2)[1:11]
+     d.u.23 <- round(table(reg.dat.23$num.dis)/nrow(reg.dat.23), 2)[1:11]
+     d.w <- round(wtd.table(reg.dat$num.dis, weights = reg.dat$weight)/nrow(reg.dat), 2)[1:11]
+     d.w.21 <- round(wtd.table(reg.dat.21$num.dis, weights = reg.dat.21$weight)/nrow(reg.dat.21), 2)[1:11]
+     d.w.23 <- round(wtd.table(reg.dat.23$num.dis, weights = reg.dat.23$weight)/nrow(reg.dat.23), 2)[1:11]
+    uni.plot.dat <- data.frame(cbind(count = 0:10, prop.u = d.u, prop.w = d.w)) %>% 
+      pivot_longer(
+        cols = c(2:3),
+        names_to = "Weighted",
+        values_to = "Prop"
+        ) %>% 
+      mutate(Weighted = factor(Weighted, labels = c("Unweighted", "Weighted"))) %>% 
+      mutate(count = as.integer(count))
+    
+    uni.plot.dat.21 <- data.frame(cbind(count = 0:10, prop.u = d.u.21, prop.w = d.w.21)) %>% 
+      pivot_longer(
+        cols = c(2:3),
+        names_to = "Weighted",
+        values_to = "Prop"
+        ) %>% 
+      mutate(Weighted = factor(Weighted, labels = c("Unweighted", "Weighted"))) %>% 
+      mutate(count = as.integer(count)) %>% 
+      mutate(year = "2021")
+    
+    uni.plot.dat.23 <- data.frame(cbind(count = 0:10, prop.u = d.u.23, prop.w = d.w.23)) %>% 
+      pivot_longer(
+        cols = c(2:3),
+        names_to = "Weighted",
+        values_to = "Prop"
+        ) %>% 
+      mutate(Weighted = factor(Weighted, labels = c("Unweighted", "Weighted"))) %>% 
+      mutate(count = as.integer(count)) %>% 
+      mutate(year = "2023")
+  uni.plot.dat.year <- rbind(uni.plot.dat.21, uni.plot.dat.23)
 ```
 
+### Pooled data plot
+```{r Univariate Distribution of Dislikes Plot (by weighted)}
+     p <- ggplot(data = uni.plot.dat, aes(x = count, y = Prop, 
+                                          color = Weighted, group = Weighted)) 
+     p <- p + geom_vline(xintercept = 1, color = "red", 
+                         linetype = 2, linewidth = .5)
+     p <- p + geom_line(alpha = c(rep(.25, 11), rep(1, 11))) 
+     p <- p + geom_point(size = 4, alpha = rep(c(.25, 1), 11))
+     p <- p + scale_x_continuous(limits = c(0,10), n.breaks = 11)
+     p <- p + theme_minimal() + labs(x = "N. of Dislikes", y = "")
+     p <- p + theme(legend.text = element_text(size = 12),
+                    axis.text.y = element_text(size = 12),
+                    axis.text.x = element_text(size = 12),
+                    axis.title.x = element_text(size = 12))
+     p <- p + scale_color_manual(values = c("blue", "blue"))
+     p <- p + guides(color = guide_legend (override.aes = list(alpha = c(.2, 1))))
+     p <- p + theme(legend.position = "top", legend.title = element_blank())
+     p
+     save_plot(here("Plots", "uni-dist-by-weighted.png"), 
+               height = 15, width = 15)
+```
+
+### Separate survey wave plot
+```{r Univariate Distribution of Dislikes Plot (unweighted by survey year)}
+     p <- ggplot(data = uni.plot.dat.year, aes(x = count, y = Prop, 
+                                          color = Weighted, group = Weighted)) 
+     p <- p + geom_vline(xintercept = 1, color = "red", 
+                         linetype = 2, linewidth = .5)
+     p <- p + geom_line(alpha = c(rep(.25, 22), rep(1, 22))) 
+     p <- p + geom_point(size = 3, alpha = rep(c(.25, 1), 22))
+     p <- p + scale_x_continuous(limits = c(0,10), n.breaks = 11)
+     p <- p + theme_minimal() + labs(x = "N. of Dislikes", y = "")
+     p <- p + scale_color_manual(values = c("blue", "blue"))
+     p <- p + guides(color = guide_legend (override.aes = list(alpha = c(.2, 1))))
+     p <- p + theme(legend.position = "bottom", 
+                    legend.title = element_blank(),
+                    strip.text = element_text(size = 14),
+                    legend.text = element_text(size = 12),
+                    axis.text.y = element_text(size = 12),
+                    axis.text.x = element_text(size = 12),
+                    axis.title.x = element_text(size = 12))
+     p <- p + scale_color_manual(values = c("blue", "blue"))
+     p <- p + facet_wrap(~ year, nrow = 1) + ylim(0, .3)
+     p
+     save_plot(here("Plots", "uni-dist-by-weighted-by-year.png"), 
+               height = 18, width = 18)
+```
+## Bivariate (Categorical Tolerance)
+```{r Bivariate Plots (Categorical Tolerance)}
+    bivar.line.plot(reg.dat$Age)
+    save_plot(here("Plots", "cat-tol-age.png"), height = 15, width = 20)
+    bivar.line.plot(reg.dat$Education)
+    save_plot(here("Plots", "cat-tol-educ.png"), height = 15, width = 20)
+    bivar.line.plot(reg.dat$Political_Ideology)
+    save_plot(here("Plots", "cat-tol-pol.png"), height = 16, width = 22)
+    bivar.bar.plot(reg.dat$Race)
+    save_plot(here("Plots", "cat-tol-race.png"), height = 15, width = 20)
+    bivar.bar.plot(reg.dat$Gender)
+    save_plot(here("Plots", "cat-tol-gender.png"), height = 15, width = 20)
+```
+
+## Bivariate (Graded Tolerance)
 ```{r Bivariate Bar Plots (N. of Dislikes)}
-      a <- reg.dat$num.dis[!reg.dat$num.dis %in% 0]
-      plot.dat <- reg.dat %>% 
-        na.omit() %>% 
-        dplyr::filter(num.dis > 0) %>% 
-        group_by(Age) %>% 
-        summarize(m = mean(num.dis)) 
-      plot.dat$Age <- factor(plot.dat$Age, 
-                             labels = c("18 - 19", "20 - 24",
-                                        "25 - 29", "30 - 34", "35 - 39", "40 - 44",
-                                        "45 - 49", "50 - 54", "55 - 59", "60 - 64",
-                                        "65 - 69", "70+"))
-      make.bar(plot.dat, x = 2, y = 1, "num-dis-age.png", m = mean(a, na.rm = T))
-     
-      plot.dat <- reg.dat %>% 
-        na.omit() %>% 
-        dplyr::filter(num.dis > 0) %>% 
-        group_by(Race) %>% 
-        summarize(m = mean(num.dis)) 
-      make.bar(plot.dat, x = 2, y = 1, "num-dis-race.png", m = mean(a, na.rm = T))
-
-      plot.dat <- reg.dat %>% 
-        na.omit() %>% 
-        dplyr::filter(num.dis > 0) %>% 
-        group_by(Gender) %>% 
-        summarize(m = mean(num.dis)) 
-      make.bar(plot.dat, x = 2, y = 1, "num-dis-gender.png", m = mean(a, na.rm = T))
-
-     
-      plot.dat <- reg.dat %>% 
-        na.omit() %>% 
-        dplyr::filter(num.dis > 0) %>% 
-        group_by(Educ) %>% 
-        summarize(m = mean(num.dis)) 
-      plot.dat$Educ <- factor(plot.dat$Educ, 
-                             labels = c("High School", "2yr. Degree", 
-                                        "Bachelor's", "PhD/Prof."))
-      make.bar(plot.dat, x = 2, y = 1, "num-dis-educ.png", m = mean(a, na.rm = T))
-
-     
-      plot.dat <- reg.dat %>% 
-        na.omit() %>% 
-        dplyr::filter(num.dis > 0) %>% 
-        group_by(polviews) %>% 
-        summarize(m = mean(num.dis)) 
-      plot.dat$polviews <- factor(plot.dat$polviews, 
-                             labels = c("Extremely liberal", "Liberal",
-                              "Slightly liberal", "Moderate",
-                              "Slightly conservative", "Conservative"))
-      make.bar(plot.dat, x = 2, y = 1, "num-dis-pol.png", m = mean(a, na.rm = T))
+    bivar.line.plot.d("Age")
+    save_plot(here("Plots", "num-dis-age.png"), height = 17, width = 20)
+    bivar.line.plot.d("Education")
+    save_plot(here("Plots", "num-dis-educ.png"), height = 12, width = 16)
+    bivar.line.plot.d("Political_Ideology")
+    save_plot(here("Plots", "num-dis-pol.png"), height = 16, width = 22)
+    bivar.bar.plot.d("Race")
+    save_plot(here("Plots", "num-dis-race.png"), height = 15, width = 20)
+    bivar.bar.plot.d("Gender")
+    save_plot(here("Plots", "num-dis-gender.png"), height = 15, width = 20)
 ```
 
+# Regression
 ```{r Regression Analysis}
-     m1 <- zeroinfl(num.dis ~ 
-                      Age  + Political_Ideology + Race |
-                      Education + Age_30_to_49 + Man + Moderate + Black + Survey_Year,
-                      data = reg.dat)
-     m2 <- zeroinfl(num.dis ~ 
-                      Age  + Political_Ideology + Race |
-                      Education*Survey_Year + Age_30_to_49*Survey_Year + 
-                      Man*Survey_Year + Moderate*Survey_Year + Black*Survey_Year,
-                      data = reg.dat)
-     tab_model(m1, transform = NULL, file = here("Tabs", "zinf-reg.html"), 
-               auto.label = TRUE, dv.labels = "", 
-               show.zeroinf = TRUE, show.aic = TRUE, show.loglik = TRUE,
-               show.ci = FALSE)
-     webshot(here("Tabs", "zinf-reg.html"), here("Tabs", "zinf-reg.png"))
+     m1 <- zeroinfl(
+       num.dis ~  Age.n + Hi.Educ + Low.Educ + polviews.n + White | 
+                  Age.n + Young + Old + Woman + Black + Hisp + Mult + Survey_Year, 
+       data = reg.dat
+       )
+     m2 <- zeroinfl(
+       num.dis ~  Age.n + Hi.Educ + Low.Educ + polviews.n + White | 
+                  Age.n + Young + Old + Woman + Black + Hisp + Mult + Survey_Year, 
+       data = reg.dat, weights = weight
+       )
+     m3 <- zeroinfl(
+       num.dis ~  Age.n + Hi.Educ + Low.Educ + polviews.n + White | 
+                  Age.n + Young + Old + Woman + Black + Hisp + Mult,       
+       data = reg.dat.21, weights = weight
+       )
+     m4 <- zeroinfl(
+       num.dis ~  Age.n + Hi.Educ + Low.Educ + polviews.n + White | 
+                  Age.n + Young + Old + Woman + Black + Hisp + Mult,       
+       data = reg.dat.23, weights = weight
+       )
+     m5 <- zeroinfl(
+       num.dis ~  Age.n + Hi.Educ + Low.Educ + polviews.n + White | 
+                  Age.n + Young + Old + Woman + Black + Hisp + Mult,       
+       data = reg.dat.21
+       )
+     m6 <- zeroinfl(
+       num.dis ~  Age.n + Hi.Educ + Low.Educ + polviews.n + White | 
+                  Age.n + Young + Old + Woman + Black + Hisp + Mult,       
+       data = reg.dat.23
+       )
+     tab_model(m1, m2, transform = NULL, 
+               file = here("Tabs", "zinf-reg.html"), 
+               auto.label = TRUE, dv.labels = c("Unweighted", "Weighted"), 
+               CSS = list(css.table = 'font-size: 12px;',
+                          css.td = 'border-bottom: 0px;'), 
+               show.zeroinf = TRUE, show.ci = FALSE)
+     tab_model(m5, m3, m6, m4, transform = NULL, 
+               file = here("Tabs", "zinf-reg-appendix.html"), 
+               auto.label = TRUE, dv.labels = 
+                 c("Unweighted (2021)", "Weighted (2021)", 
+                   "Unweighted (2023)", "Weighted (2023)"), 
+               CSS = list(css.table = 'font-size: 13px;',
+                          css.td = 'border-bottom: 0px;'),               
+               show.zeroinf = TRUE, show.ci = FALSE)
 ```
 
 
