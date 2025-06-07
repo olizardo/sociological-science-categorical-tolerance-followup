@@ -39,8 +39,7 @@
           mutate(num.dis = sum(c_across(Classical:Metal), na.rm = T)) %>% 
           ungroup() %>% 
           mutate(bin.dis = if_else(num.dis == 0, 1, 0))
-    head(dat.dis)
-         reg.dat <- dat.demog(dat) %>% 
+    reg.dat <- dat.demog(dat) %>% 
           left_join(dat.dis) %>% 
           rename(Survey_Year = year, Political_Ideology = polviews, Education = Educ) %>%
           mutate(Black = if_else(Race == "Black", 1, 0)) %>% 
@@ -399,7 +398,7 @@
 ```{r Regression Analysis}
      m1 <- zeroinfl(
        num.dis ~  Age.n + Hi.Educ + Low.Educ + polviews.n + White | 
-                  Age.n + Young + Old + Woman + Black + Hisp + Mult + Survey_Year, 
+                  Young + Old + Woman + Black + Hisp + Mult + Survey_Year, 
        data = reg.dat
        )
      m2 <- zeroinfl(
