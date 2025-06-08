@@ -41,21 +41,22 @@ The rest of the paper is organized as follows. The next section briefly reviews 
 
 \section*{Results}
 \subsection*{Probability of Dislikes by Genre}
+\begin{table}[ht!]
+    \caption{Proportion of dislikes by genre.}
+    \includegraphics[trim={0 11cm 0 0},clip, width=1.0\textwidth]{Tabs/desc-tab-dislike.png}
+    \label{tab:dis-by-genres}
+\end{table}
+
 Table~\ref{tab:dis-by-genres} shows the probability of any genre experiencing a judgment of dislike. As we can see, Metal is the genre more likely to be disliked, consistent with previous work in the United States \citep{bryson1996anything-311, lizardo2015musical-8c6}. Electronic Dance Music, Rap/Hip Hop, and Broadway/Musicals are also toward the top in terms of dislikes. R\&B, Rock, and Pop/Top 40, on the other hand, have comparatively low odds of being disliked. 
 
 \subsection*{Univariate Distribution of Number of Dislikes}
-\begin{figure}[ht!]
-        \includegraphics[trim={0 11cm 0 0},clip, width=1.0\textwidth]{Tabs/desc-tab-dislike.png}
-    \caption{Proportion of dislikes by genre.}
-    \label{tab:dis-by-genres}
-\end{figure}
 
 \begin{figure}[ht!]
         \includegraphics[width=1.0\textwidth]{Plots/uni-dist-cat-tol.png}
     \caption{Univariate plot of number of dislikes.}
     \label{fig:main}
 \end{figure}
-Figure~\ref{fig:main} shows the univariate distribution of the number of dislikes for the LM 2025 data. As we can see, the distribution exhibits excess zeroes, with about 20\% of the sample reporting zero dislikes among the twelve musical genres included. 
+Figure~\ref{fig:main} shows the univariate distribution of the number of dislikes for the LM 2025 data. As we can see, the distribution exhibits excess zeroes, with about 20\% of the sample reporting zero dislikes among the twelve musical genres included. This figure is higher than the 15\% reported by \citet{lizardo2016end-4fb}, although we should be cautious when making direct comparisons, given that the number of genres included is lower in the LM 2025 marketplace survey. Nevertheless, we can at the very least conclude that categorical tolerance remains a pervasive phenomenon among a substantial number of Americans, and the taste regime governing patterns of cultural choice among Americans in the second decade of the twenty-first century certainly no longer resembles that captured by the GSS in the early 1990s. 
 
 
 \begin{figure}[ht!]
