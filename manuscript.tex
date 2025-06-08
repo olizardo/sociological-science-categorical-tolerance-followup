@@ -41,22 +41,30 @@ The rest of the paper is organized as follows. The next section briefly reviews 
 
 \section*{Results}
 \subsection*{Probability of Dislikes by Genre}
+Table~\ref{tab:dis-by-genres} shows the probability of any genre experiencing a judgment of dislike for both the Prolific and Lucid samples. As we can see, Metal is the genre more likely to be disliked in both samples, consistent with previous work on the musical tastes of Americans based on data collected at earlier time points \citep{bryson1996anything-311, lizardo2015musical-8c6}. Both samples also agree that the two genres least likely to be disliked are Rock and Pop music. There is some disagreement across samples on the exact ranking of other genres, with Country music experiencing the largest disparity, being the second most disliked genre in the Prolific sample but being close to the bottom in the Lucid sample. Beyond that, both datasets agree that Musicals, Rap, and Disco are at the top of the dislike list, while Classical, R\&B, and Jazz are closer to the bottom. 
+
 \begin{table}[ht!]
     \caption{Proportion of dislikes by genre.}
     \includegraphics[trim={0 11cm 0 0},clip, width=1.0\textwidth]{Tabs/desc-tab-dislike.png}
     \label{tab:dis-by-genres}
 \end{table}
 
-Table~\ref{tab:dis-by-genres} shows the probability of any genre experiencing a judgment of dislike. As we can see, Metal is the genre more likely to be disliked, consistent with previous work in the United States \citep{bryson1996anything-311, lizardo2015musical-8c6}. Electronic Dance Music, Rap/Hip Hop, and Broadway/Musicals are also toward the top in terms of dislikes. R\&B, Rock, and Pop/Top 40, on the other hand, have comparatively low odds of being disliked. 
-
 \subsection*{Univariate Distribution of Number of Dislikes}
+Table~\ref{tab:dis-dist} shows the univariate distribution of the number of dislikes for both the Prolific and Lucid datasets. As we can see, both datasets agree closely in their estimate of the proportion of categorical tolerants, with the Prolific data returning an estimate of about 19\% of the sample and the Lucid dataset returning an estimate of about 20\%. When we combine both
+
+the distribution exhibits excess zeroes, with about 20\% of the sample reporting zero dislikes among the twelve musical genres included. This figure is higher than the 15\% reported by \citet{lizardo2016end-4fb}. We should be cautious when making direct comparisons, given that the number of genres included is lower in the LM 2025 marketplace survey. Nevertheless, we can at the very least conclude that categorical tolerance remains a pervasive phenomenon among a substantial number of Americans. The taste regime governing patterns of cultural choice among Americans in the second decade of the twenty-first century certainly no longer resembles that captured by the GSS in the early 1990s, with a larger-than-expected number of people refusing to express dislikes for any genre. 
+
+\begin{table}[ht!]
+    \caption{Univariate distribution of dislikes for the Prolific and Lucid samples.}
+    \includegraphics[trim={0 11cm 0 0},clip, width=1.0\textwidth]{Tabs/desc-tab-dislike-dist.png}
+    \label{tab:dis-dist}
+\end{table}
 
 \begin{figure}[ht!]
         \includegraphics[width=1.0\textwidth]{Plots/uni-dist-cat-tol.png}
     \caption{Univariate plot of number of dislikes.}
     \label{fig:main}
 \end{figure}
-Figure~\ref{fig:main} shows the univariate distribution of the number of dislikes for the LM 2025 data. As we can see, the distribution exhibits excess zeroes, with about 20\% of the sample reporting zero dislikes among the twelve musical genres included. This figure is higher than the 15\% reported by \citet{lizardo2016end-4fb}. We should be cautious when making direct comparisons, given that the number of genres included is lower in the LM 2025 marketplace survey. Nevertheless, we can at the very least conclude that categorical tolerance remains a pervasive phenomenon among a substantial number of Americans. The taste regime governing patterns of cultural choice among Americans in the second decade of the twenty-first century certainly no longer resembles that captured by the GSS in the early 1990s, with a larger-than-expected number of people refusing to express dislikes for any genre. 
 
 \subsection*{Socio-Demographic Distribution of Categorical Tolerance}
 \begin{figure}[ht!]
