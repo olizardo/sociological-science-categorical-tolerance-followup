@@ -50,7 +50,7 @@ Table~\ref{tab:dis-by-genres} shows the probability of any genre experiencing a 
 \end{table}
 
 \subsection*{Univariate Distribution of Number of Dislikes}
-Table~\ref{tab:dis-dist} shows the univariate distribution of the number of dislikes for both the Prolific and Lucid datasets. As we can see, both datasets agree closely in their estimate of the proportion of categorical tolerants, with the Prolific data returning an estimate of about 19\% of the sample and the Lucid dataset returning an estimate of about 20\%. When we combine both, we get an estimate of 19.6\%, suggesting that about a fifth of the American population today can be classified as categorical tolerants, an increase from L\&S's estimate of about 15\% using data from 2012.\footnote{We should be cautious when making direct comparisons, given that the number of genres included is lower in the LM 2025 marketplace survey. Nevertheless, we can at the very least conclude that categorical tolerance remains a pervasive phenomenon among a substantial number of Americans.} 
+Table~\ref{tab:dis-dist} shows the univariate distribution of the number of dislikes for both the Prolific and Lucid datasets. As we can see, both datasets agree closely in their estimate of the proportion of categorical tolerants, with the Prolific data returning an estimate of about 19\% of the sample and the Lucid dataset returning an estimate of about 20\%. When we combine both, we get an estimate of 19.6\%, suggesting that about a fifth of the American population today can be classified as categorical tolerants, an increase from L\&S's estimate of about 15\% using data from 2012.\footnote{We should be cautious when making direct comparisons, given that the number of genres included is smaller (twelve versus twenty in L\&S's 2012 survey) in both the Prolific and Lucid samples. Nevertheless, we can at the very least conclude that categorical tolerance remains a pervasive phenomenon among a substantial number of Americans.} 
 
 \begin{table}[ht!]
     \caption{Univariate distribution of dislikes for the Prolific and Lucid samples.}
@@ -62,7 +62,7 @@ As shown in Figure~\ref{fig:main}, the distribution of the number of dislikes we
 
 \begin{figure}[ht!]
         \includegraphics[width=1.0\textwidth]{Plots/uni-dist-cat-tol.png}
-    \caption{Univariate plot of number of dislikes, joint Prolific and Lucid samples.}
+    \caption{Univariate plot of number of dislikes, joint Prolific and Lucid samples (N = 2306).}
     \label{fig:main}
 \end{figure}
 
@@ -104,11 +104,15 @@ As shown in Figure~\ref{fig:main}, the distribution of the number of dislikes we
     \label{fig:cat-tol}
 \end{figure}
 
-Figure~\ref{fig:cat-tol} shows how the sample probability of being a categorical tolerant is distributed among various socio-demographic categories. As Figure~\ref{fig:cat-tol-age} shows, age is the most straightforward structuring factor, replicating the pattern observed by \citet{lizardo2016end-4fb}: Younger people are more likely to be categorical tolerants compared to older people. The probability of being a categorical tolerant in these data is maximized among younger adults (individuals in their thirties), suggesting that very young people are induced to use musical genres for purposes of symbolic inclusion to a greater extent than people at this life-stage. Regardless, it is clear that if cohort replacement dynamics drive the rise of categorical tolerance, then we should expect it to remain a fixture of the cultural taste landscape in the U.S. as older, less categorically tolerant cohorts exit the population. 
+Figure~\ref{fig:cat-tol} shows how the sample probability of being a categorical tolerant is distributed among various socio-demographic categories. Each panel of Figure~\ref{fig:cat-tol} shows a ``lollipop plot'' with the numerical axis being the proportion of categorical tolerants at each level of the corresponding socio-demographic covariate. The red dashed reference line is the observed sample proportion of categorical tolerants. 
 
-The other obvious factor structuring categorical tolerance in the United State is race. Mirroring L\&S's earlier findings, Figure~\ref{fig:cat-tol-rac}, shows that categorical tolerance continues to be primarily a non-white phenomenon, with whites under-
+As Figure~\ref{fig:cat-tol-age} shows, age is the most straightforward factor structuring categorical tolerance, replicating the pattern observed by \citet{lizardo2016end-4fb}: Younger people are more likely to be categorical tolerants compared to older people, who are strongly under-represented among categorical tolerants; accordingly, the probability of being a categorical tolerant in these data is maximized among younger adults (individuals in their thirties), suggesting that very young people are induced to use musical genres for purposes of symbolic inclusion to a greater extent than people at this life-stage. Regardless, it is clear that if cohort replacement dynamics drive the rise of categorical tolerance, then we should expect it to remain a fixture of the cultural taste landscape in the U.S. as older, less categorically tolerant cohorts exit the population. 
+
+The other obvious factor structuring categorical tolerance in the United States is race. Mirroring L\&S's earlier findings, Figure~\ref{fig:cat-tol-rac} shows that categorical tolerance continues to be primarily a non-white phenomenon, with whites (and to a similar extent respondents who identify as Hispanic) under-represented among categorical tolerants, and Black, Asian, and Native American respondents over-represented. Also similar to L\&S's findings, the traditional Bourdieusian structuring factors (e.g., education and income) do not have a straightforward link to categorical tolerance, with both showing non-linear patterns (categorical tolerants over-represented among both high and low education and high and low-income respondents). Interestingly, we also observe a strong gender effect — unlike L\&S's earlier findings — which suggests a relatively large gender gap in this taste pattern, with men overrepresented and women underrepresented among the ranks of categorical tolerants. Finally, and also consequentially, categorical tolerance---in contrast to symbolic exclusion as we will see in a bit---is not polarized along political-ideological lines, with no clear pattern shown according to conservative/liberal placement. 
 
 \subsection*{Socio-Demographic Distribution of Symbolic Exclusion}
+The obverse phenomenon of categorical tolerance is \emph{symbolic exclusion} \citep{bryson1996anything-311}, that is, the probability of expressing at least one dislike, among those in the population who are at risk of doing so. Figure~\ref{fig:grd-int} shows the distribution of symbolic exclusion propensities in the joint Prolific and Lucid sample using a similar plotting strategy as Figure~\ref{fig:cat-tol}, but this time with the average number of dislikes expressed by members of each socio-demographic category in the numerical axis. The dashed red reference line, like before, represents the average number of dislikes among individuals in the joint sample. 
+
 \begin{figure}[ht!]
     \captionsetup[subfigure]{font=footnotesize,labelfont=footnotesize}
     \centering
@@ -145,6 +149,18 @@ The other obvious factor structuring categorical tolerance in the United State i
     \caption{Average number of cultural dislikes across different socio-demographic characteristics.}
     \label{fig:grd-int}
 \end{figure}
+
+Symbolic exclusion propensities among different groups can be straightforwardly accounted for by age and education, with older, less educated respondents expressing more dislikes than younger, more educated ones. Importantly, symbolic exclusion is also structured by political ideology in the expected direction---see \citet{rawlings2023polarization-0af}---with liberals being less likely to express cultural dislikes than self-identified conservatives. In the same way, non-whites in the sample are less likely to express cultural dislikes (compared to white respondents), while women express more dislikes (compared to those who identify as men). 
+
+\section*{Zero-Inflated Poisson Regression Models}
+In their original paper, \citet{lizardo2016end-4fb} proposed modeling categorical tolerance and symbolic exclusion jointly as a hurdle process. The basic idea is that categorical tolerants are a distinct slice of the population who are not at risk of engaging in symbolic exclusion (expressing dislikes). Thus, we can statistically model the joint predictors of both tendencies by assuming that there is a set of predictors that drive the probability of being in the categorical tolerant group (thus not being at risk of expressing dislikes), and net of this, there is a second set of predictors that drive the number of dislikes expressed for those who are at risk of doing so. The zero-inflated Poisson model is thus a natural framework for modeling this dual regime data-generating process \citep{zorn1998analytic-6b1}. 
+
+\begin{figure}[ht!]
+        \includegraphics[width=1.0\textwidth]{Plots/uni-dist-cat-tol.png}
+    \caption{Univariate plot of number of dislikes, joint Prolific and Lucid samples (N = 2306).}
+    \label{fig:main}
+\end{figure}
+
 \newpage
 \bibliography{references}
 \bibliographystyle{apalike}
