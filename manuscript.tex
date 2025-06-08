@@ -155,11 +155,16 @@ Symbolic exclusion propensities among different groups can be straightforwardly 
 \section*{Zero-Inflated Poisson Regression Models}
 In their original paper, \citet{lizardo2016end-4fb} proposed modeling categorical tolerance and symbolic exclusion jointly as a hurdle process. The basic idea is that categorical tolerants are a distinct slice of the population who are not at risk of engaging in symbolic exclusion (expressing dislikes). Thus, we can statistically model the joint predictors of both tendencies by assuming that there is a set of predictors that drive the probability of being in the categorical tolerant group (thus not being at risk of expressing dislikes), and net of this, there is a second set of predictors that drive the number of dislikes expressed for those who are at risk of doing so. The zero-inflated Poisson model is thus a natural framework for modeling this dual regime data-generating process \citep{zorn1998analytic-6b1}. 
 
-\begin{figure}[ht!]
-        \includegraphics[width=1.0\textwidth]{Plots/uni-dist-cat-tol.png}
-    \caption{Univariate plot of number of dislikes, joint Prolific and Lucid samples (N = 2306).}
-    \label{fig:main}
-\end{figure}
+\begin{table}
+    \caption{Coefficient Estimates from Zero-Inflated Poisson Models Predicting Categorical Tolerance and Symbolic Exclusion, Joint Prolific and Lucid Samples.}
+    \centering
+    \includegraphics[trim={0 3cm 11.6cm 0},clip, width=1.0\textwidth]{Tabs/zinf-reg.png}
+    \label{tab:zinf}
+\end{table}
+
+Table~\ref{tab:zinf} shows the coefficient estimates from a set of four zero-inflated Poisson regression models. The specifications in each model, for both the count and zero-inflated components, are informed by the descriptive patterns we considered in Figures~\ref{fig:cat-tol} and~\ref{fig:grd-int}. Coefficient estimates corresponding to the count part of the model---predicting the number of dislikes among those who are at risk of expressing them---are shown in the top half of the table. Coefficient estimates for the zero-inflation part of the model, predicting the odds of landing in the categorical tolerant group---and thus not being at risk of engaging in symbolic exclusion---are presented in the lower half of the table. In all models, age, education, income, and political ideology (with higher values indicating a more liberal stance) are entered as ordered numerical inputs. Race (White) and Gender (Female) are entered into the model as dummy indicators. The zero-inflated specifications also contain squared terms for education and income to model expected curvilinear effects (see Figures~\ref{fig:cat-tol-edu} and~\ref{fig:cat-tol-inc}).
+
+Let us begin with the predictors of symbolic exclusion; 
 
 \newpage
 \bibliography{references}
