@@ -31,8 +31,8 @@ dat.demog <- function(x) {
       mutate(Age2 = Age.n^2) %>% 
       mutate(Educ.n = as.numeric(Educ)) %>% 
       mutate(Educ2 = Educ.n^2) %>% 
-      mutate(low.Educ = if_else(Educ.n == 1, 1, 0)) %>% 
       mutate(polviews.n = as.numeric(PolViews)) %>% 
-      mutate(Inc.n = as.numeric(Inc))
+      mutate(Inc.n = as.numeric(Inc)) %>% 
+      mutate(Inc2 = Inc.n^2)
       return(w)
       }
