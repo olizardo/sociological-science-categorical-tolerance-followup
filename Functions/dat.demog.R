@@ -28,11 +28,8 @@ dat.demog <- function(x) {
       mutate(Native = if_else(Race == "American Indian or Alaska Native", 1, 0)) %>% 
       mutate(Woman = if_else(Gender == "Woman", 1, 0)) %>% 
       mutate(Age.n = as.numeric(Age)) %>% 
-      mutate(Age2 = Age.n^2) %>% 
       mutate(Educ.n = as.numeric(Educ)) %>% 
-      mutate(Educ2 = Educ.n^2) %>% 
       mutate(polviews.n = as.numeric(PolViews)) %>% 
       mutate(Inc.n = as.numeric(Inc)) %>% 
-      mutate(Inc2 = Inc.n^2)
       return(w)
       }
