@@ -219,40 +219,82 @@
 # Regression
 ```{r Regression Analysis}
      m1 <- zeroinfl(
-       num.dis ~  Age.n + Educ.n + Inc.n + polviews.n + White + Woman | Age.n, 
+       num.dis ~  Age.n + Educ.n + Inc.n + polviews.n + White + Woman + year | Age.n + year, 
        data = dat.dis
        )
      m2 <- zeroinfl(
-       num.dis ~  Age.n + Educ.n + Inc.n + polviews.n + White | Age.n + White + Woman, 
+       num.dis ~  Age.n + Educ.n + Inc.n + polviews.n + White + year | Age.n + White + Woman + year, 
        data = dat.dis
        )
      m3 <- zeroinfl(
-       num.dis ~  Age.n + Educ.n + Inc.n + polviews.n + White | Age.n + White + Woman +
-         Educ.n + Educ2, 
+       num.dis ~  Age.n + Educ.n + Inc.n + polviews.n + White + year | Age.n + White + Woman +
+         Educ.n + I(Educ.n^2) + year, 
        data = dat.dis
        )
      m4 <- zeroinfl(
-       num.dis ~  Age.n + Educ.n + Inc.n + polviews.n + White | Age.n + White +  Woman +
-         Educ.n + Educ2 + Inc.n + Inc2, 
+       num.dis ~  Age.n + Educ.n + Inc.n + polviews.n + White + year | Age.n + White +  Woman +
+         Educ.n + + I(Educ.n^2) + Inc.n + + I(Inc.n^2) + year, 
        data = dat.dis
        )
-     names(m1$coefficients$zero) <- c("Intercept", "Age")
-     names(m2$coefficients$zero) <- c("Intercept", "Age", "White", "Woman")
+     names(m1$coefficients$zero) <- c("Intercept", "Age", "Survey (Prolific 2023)", "Survey (Lucid 2025)")
+     names(m2$coefficients$zero) <- c("Intercept", "Age", "White", "Woman", "Survey (Prolific 2023)", 
+                                      "Survey (Lucid 2025)")
      names(m3$coefficients$zero) <- c("Intercept", "Age", "White", "Woman",
-                                      "Education", "Education Squared")
+                                      "Education", "Education Squared", "Survey (Prolific 2023)", "Survey (Lucid 2025)")
      names(m4$coefficients$zero) <- c("Intercept", "Age", "White", "Woman",
                                       "Education", "Education Squared", 
-                                      "Income", "Income Squared")
+                                      "Income", "Income Squared", "Survey (Prolific 2023)", "Survey (Lucid 2025)")
      tab_model(m1, m2, m3, m4, transform = NULL, digits = 3, prefix.labels = "none",
                file = here("Tabs", "zinf-reg.html"), 
                auto.label = TRUE, dv.labels = c("Model 1", "Model 2", "Model 3", "Model 4"), 
                CSS = list(css.table = 'font-size: 12px;', css.td = 'border-bottom: 0px;'), 
                show.zeroinf = TRUE, show.ci = FALSE,
                pred.labels = c("Intercept", "Age", "Education", "Income", "Pol. Liberalism", 
-                               "White", "Woman")
+                               "White", "Woman", "Survey (Prolific 2023)", "Survey (Lucid 2025)")
                )
-    webshot(here("Tabs", "zinf-reg.html"), here("Tabs", "zinf-reg.png"))
+    webshot(here("Tabs", "zinf-reg.html"), here("Tabs", "zinf-reg.png"), zoom = 4)
+```
 
+```{r Predicted Probability Plots Data}
+    educ.pred <- ggaverage(m4, terms = c("Educ.n"), type = "zi_prob")
+    educ.pred.dat <- data.frame(Educ = 1:6) %>% 
+      mutate(Educ = factor(Educ, labels = levels(dat.dis$Educ))) %>% 
+      cbind(pr = educ.pred$predicted) %>% 
+      cbind(l = educ.pred$conf.low) %>% 
+      cbind(h = educ.pred$conf.high) 
+    
+    inc.pred <- ggaverage(m4, terms = c("Inc.n"), type = "zi_prob")
+    inc.pred.dat <- data.frame(Inc = 1:12) %>% 
+      mutate(Inc = factor(Inc, labels = levels(dat.dis$Inc))) %>% 
+      cbind(pr = inc.pred$predicted) %>% 
+      cbind(l = inc.pred$conf.low) %>% 
+      cbind(h = inc.pred$conf.high) 
+```
+
+```{r Predicted Probability Plots}
+    p <- ggplot(data = educ.pred.dat, aes(x = Educ, y = pr))
+    p <- p + geom_point(size = 4, color = "blue")
+    p <- p + geom_segment(aes(x = Educ, xend = Educ, y = l, yend = h), color = "blue")
+    p <- p + geom_hline(yintercept = mean(dat.dis$bin.dis), 
+                        color = "red", linetype = 2, linewidth = 1)
+    p <- p + theme_sjplot() + labs(x = "", y = "") + ylim(0, 0.5)
+    p <- p + theme(axis.text = element_text(size = 16),
+                         axis.title = element_text(size = 16))
+    p <- p + coord_flip()
+    p
+    save_plot(here("Plots", "educ-pred-plot.png"), height = 15, width = 20)
+
+    p <- ggplot(data = inc.pred.dat, aes(x = Inc, y = pr))
+    p <- p + geom_point(size = 4, color = "blue")
+    p <- p + geom_segment(aes(x = Inc, xend = Inc, y = l, yend = h), color = "blue")
+    p <- p + geom_hline(yintercept = mean(dat.dis$bin.dis), 
+                        color = "red", linetype = 2, linewidth = 1)
+    p <- p + theme_sjplot() + labs(x = "", y = "") + ylim(0, 0.3)
+    p <- p + theme(axis.text = element_text(size = 16),
+                         axis.title = element_text(size = 16))
+    p <- p + coord_flip()
+    p
+    save_plot(here("Plots", "inc-pred-plot.png"), height = 15, width = 20)
 ```
 
 
