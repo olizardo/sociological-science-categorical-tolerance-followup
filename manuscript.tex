@@ -158,13 +158,32 @@ In their original paper, \citet{lizardo2016end-4fb} proposed modeling categorica
 \begin{table}
     \caption{Coefficient Estimates from Zero-Inflated Poisson Models Predicting Categorical Tolerance and Symbolic Exclusion, Joint Prolific and Lucid Samples.}
     \centering
-    \includegraphics[trim={0 0 0 0},clip, width=1.0\textwidth]{Tabs/zinf-reg.png}
+    \includegraphics[trim={0 15cm 45cm 0},clip, width=1.0\textwidth]{Tabs/zinf-reg.png}
     \label{tab:zinf}
 \end{table}
 
 Table~\ref{tab:zinf} shows the coefficient estimates from a set of four zero-inflated Poisson regression models. The specifications in each model, for both the count and zero-inflated components, are informed by the descriptive patterns we considered in Figures~\ref{fig:cat-tol} and~\ref{fig:grd-int}. Coefficient estimates corresponding to the count part of the model---predicting the number of dislikes among those who are at risk of expressing them---are shown in the top half of the table. Coefficient estimates for the zero-inflation part of the model, predicting the odds of landing in the categorical tolerant group---and thus not being at risk of engaging in symbolic exclusion---are presented in the lower half of the table. In all models, age, education, income, and political ideology (with higher values indicating a more liberal stance) are entered as ordered numerical inputs. Race (White) and Gender (Female) are entered into the model as dummy indicators. The zero-inflated specifications also contain squared terms for education and income to model expected curvilinear effects (see Figures~\ref{fig:cat-tol-edu} and~\ref{fig:cat-tol-inc}).
 
-Let us begin with the predictors of symbolic exclusion; 
+Let us begin with the predictors of symbolic exclusion. Model one includes all of the main socio-demographic predictors. The results align with expectations derived from the descriptive patterns considered earlier. Age increases the probability of engaging in symbolic exclusion, but education and income decrease this propensity. Liberals are less likely to engage in symbolic exclusion than conservatives, but white respondents are more likely to express dislikes, compared to non-white respondents. Finally, there is no appreciable gender difference in the propensity to engage in symbolic exclusion via cultural dislikes ($p = 0.52$).
+
+Model 1 includes age as the sole predictor in the zero-inflated part of the model, providing evidence that categorical tolerance is primarily a cultural habit among the young and is less likely to be found among older respondents ($p < 0.01$). Model 2 includes race and gender as additional predictors of categorical tolerance, verifying the expectation that white respondents are less likely to be found in this group (compared to non-white respondents) and women are less likely to be categorical tolerants (compared to respondents who identify as men). Model 3 introduces education as an additional predictor of categorical tolerance, including a linear input for the respondent's education and a square term for the same covariate. The results verify the idea, suggested by Figure~\ref{fig:cat-tol-edu}, the education effect on the odds of being a categorical tolerant is parabolic, with a negative linear component (indicating that lower education person are more likely to be in the categorical tolerant group) and a positive squared component (indicating that at some point the negative effect reverses, and very high-education individuals end up over-represented among the categorical tolerants). 
+
+\begin{figure}[ht!]
+    \captionsetup[subfigure]{font=footnotesize,labelfont=footnotesize}
+    \centering
+     \begin{subfigure}[b]{0.3\textwidth}
+        \includegraphics[width=1.0\textwidth]{Plots/uni-dist-grd-int-pol.png}
+            \caption{Political Ideology}
+            \label{fig:grd-int-pol}
+    \end{subfigure}
+     \begin{subfigure}[b]{0.3\textwidth}
+        \includegraphics[width=1.0\textwidth]{Plots/uni-dist-grd-int-edu.png}
+            \caption{Education}
+            \label{fig:grd-int-edu}
+    \end{subfigure}
+    \caption{Average number of cultural dislikes across different socio-demographic characteristics.}
+    \label{fig:grd-int}
+\end{figure}
 
 \newpage
 \bibliography{references}
