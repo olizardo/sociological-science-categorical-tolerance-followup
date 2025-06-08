@@ -22,7 +22,7 @@
      conflicts_prefer(dplyr::summarize)
 ```
 
-```{r Getting and Wrangling Data (Lucid)}
+```{r Getting Data (Lucid)}
    dat.25 <- fetch_survey(surveyID = "SV_80RzX3ibOsBq3Lo") %>% 
       slice(-1) %>% #getting rid of first row 
       filter(Q_RecaptchaScore  > 0.50) %>%  #removing suspected bots
@@ -31,17 +31,17 @@
 
 # Data Wrangling
 
-```{r Demographics and Dislikes Data}
+```{r Wrangling Dislikes Data and Merging Demographics}
      source(here("Functions", "dat.genres.R"))
-     source(here("Functions", "dat.demog2.R"))
+     source(here("Functions", "dat.demog.R"))
     # Lucid Data
      dat.dis.25 <- dat.genres(dat.25)$dat.g %>%
           mutate(across(Classical:Metal, function(x) {if_else(x < 3, 1, 0)})) %>% 
           rowwise() %>% 
-          mutate(num.dis = sum(c_across(Classical:Metal), na.rm = T)) %>% 
+          mutate(num.dis = sum(c_across(Classical:Metal), na.rm = TRUE)) %>% 
           ungroup() %>% 
           mutate(bin.dis = if_else(num.dis == 0, 1, 0)) %>% 
-          left_join(dat.demog2(dat.25))
+          left_join(dat.demog(dat.25))
 ```
 
 # Descriptives
@@ -59,8 +59,8 @@
     
      dat.g.25 <- dat.g.25[order(dat.g.25[, "Proportion"], decreasing = TRUE), ]
      kbl(dat.g.25, caption = "", format = "html", align = c("l", "c", "l", "c"), row.names = F,
-          col.names = c("Genre", "Proportion")) %>% 
-          kable_classic_2(full_width = F, 
+          col.names = c("Genre", "Percentage Dislike")) %>% 
+          kable_classic_2(full_width = T, 
           html_font = "Garamond", font_size = 20) %>% 
           save_kable(here("Tabs", "desc-tab-dislike.html"))
      webshot(here("Tabs", "desc-tab-dislike.html"), here("Tabs", "desc-tab-dislike.png"))
@@ -69,13 +69,13 @@
 ```{r Functions}
      make.lolli.plot <- function(w, a = 0, v = 0, h = 0) {
           p <- ggplot(data = w, aes(x = w[,1], y = w[,2]))
-          p <- p + geom_point(size = 5, color = "blue")
+          p <- p + geom_point(size = 7, color = "blue")
           p <- p + geom_segment(aes(x = w[,1], xend = w[,1], y = 0, yend = w[,2]), 
                        color = "blue", linewidth =  1) 
           p <- p + theme_minimal() + labs(x = "", y = "")
-          p <- p + theme(axis.text = element_text(size = 12),
+          p <- p + theme(axis.text = element_text(size = 16),
                          axis.text.x = element_text(angle = a, vjust = v, hjust = h),
-                         axis.title = element_text(size = 12))
+                         axis.title = element_text(size = 16))
           return(p)
           }
      make.plot.dat <- function(w, x, y) {
@@ -89,7 +89,7 @@
           }
 ```
 
-```{r}
+```{r Univariate Distribution Plot}
       dat.count.25 <- dat.dis.25 %>% 
         group_by(num.dis) %>% 
         summarize(n = n()) %>% 
@@ -98,57 +98,58 @@
         mutate(Count = as.factor(Count)) %>% 
         select(Count, Proportion)
       p <- ggplot(data = dat.count.25, aes(Count, y = Proportion, group = 1))
-      p <- p + geom_vline(xintercept = 2, color = "red", linetype = 2, linewidth = .5)
-      p <- p + geom_line(color = "blue") 
-      p <- p + geom_point(size = 4, color = "blue")
+      p <- p + geom_vline(xintercept = 2, color = "red", linetype = 2, linewidth = 1)
+      p <- p + geom_line(color = "blue", linewidth = 1) 
+      p <- p + geom_point(size = 6, color = "blue")
       p <- p + theme_minimal() 
       p <- p + labs(x = "Number of Dislikes", y = "")
-      p <- p + theme(axis.text = element_text(size = 12),
+      p <- p + theme(axis.text = element_text(size = 18),
                      axis.text.x = element_text(hjust = 0.6),
-                     axis.title = element_text(size = 12))
+                     axis.title = element_text(size = 18))
       p <- p + ylim(0, 0.25)
       p
-     save_plot(here("Plots", "uni-dist-cat-tol.png"), height = 15, width = 15)
+     save_plot(here("Plots", "uni-dist-cat-tol.png"), height = 15, width = 20)
 ```
 
 
 ```{r Bivariate Plots}
+     w <- 20
      # Cat. Tolerance
-     make.lolli.plot(make.plot.dat(dat.dis.25, Age, bin.dis), a = 35)
-     save_plot(here("Plots", "uni-dist-cat-tol-age.png"), height = 15, width = 15)
+     make.lolli.plot(make.plot.dat(dat.dis.25, Age, bin.dis), a = 35, v = 1.1, h = 1)
+     save_plot(here("Plots", "uni-dist-cat-tol-age.png"), height = 15, width = w)
      make.lolli.plot(make.plot.dat(dat.dis.25, Inc, bin.dis), a = 52, v = 1.1, h = 1)
-     save_plot(here("Plots", "uni-dist-cat-tol-inc.png"), height = 15, width = 15)
+     save_plot(here("Plots", "uni-dist-cat-tol-inc.png"), height = 15, width = w)
      make.lolli.plot(make.plot.dat(dat.dis.25, PolViews, bin.dis), a = 55, v = 1.1, h = 1)
-     save_plot(here("Plots", "uni-dist-cat-tol-pol.png"), height = 15, width = 15)
-     make.lolli.plot(make.plot.dat(dat.dis.25, Educ, bin.dis), a = 45, v = 1.1, h = 1)
-     save_plot(here("Plots", "uni-dist-cat-tol-edu.png"), height = 15, width = 15)
+     save_plot(here("Plots", "uni-dist-cat-tol-pol.png"), height = 15, width = w)
+     make.lolli.plot(make.plot.dat(dat.dis.25, Educ, bin.dis), a = 52, v = 1.1, h = 1)
+     save_plot(here("Plots", "uni-dist-cat-tol-edu.png"), height = 15, width = w)
      make.lolli.plot(make.plot.dat(dat.dis.25, Race, bin.dis)[-5, ]) + coord_flip()
-     save_plot(here("Plots", "uni-dist-cat-tol-rac.png"), height = 15, width = 15)
+     save_plot(here("Plots", "uni-dist-cat-tol-rac.png"), height = 15, width = w)
      make.lolli.plot(make.plot.dat(dat.dis.25, Gender, bin.dis)[1:2, ]) + coord_flip()
-     save_plot(here("Plots", "uni-dist-cat-tol-gen.png"), height = 15, width = 15)
+     save_plot(here("Plots", "uni-dist-cat-tol-gen.png"), height = 15, width = w)
      # Graded Intolerance
-     make.lolli.plot(make.plot.dat(dat.dis.25, Age, num.dis), a = 35)
-     save_plot(here("Plots", "uni-dist-grd-int-age.png"), height = 15, width = 15)
-     make.lolli.plot(make.plot.dat(dat.dis.25, Inc, num.dis), a = 52, v = 1.1, h = 1)
-     save_plot(here("Plots", "uni-dist-grd-int-inc.png"), height = 15, width = 15)
-     make.lolli.plot(make.plot.dat(dat.dis.25, PolViews, num.dis), a = 55, v = 1.1, h = 1)
-     save_plot(here("Plots", "uni-dist-grd-int-pol.png"), height = 15, width = 15)
-     make.lolli.plot(make.plot.dat(dat.dis.25, Educ, num.dis), a = 45, v = 1.1, h = 1)
-     save_plot(here("Plots", "uni-dist-grd-int-edu.png"), height = 15, width = 15)
-     make.lolli.plot(make.plot.dat(dat.dis.25, Race, num.dis)[-5, ]) + coord_flip()
-     save_plot(here("Plots", "uni-dist-grd-int-rac.png"), height = 15, width = 15)
-     make.lolli.plot(make.plot.dat(dat.dis.25, Gender, num.dis)[1:2, ]) + coord_flip()
-     save_plot(here("Plots", "uni-dist-grd-int-gen.png"), height = 15, width = 15)
-
+     dat.dis.25.nozero <- filter(dat.dis.25, num.dis > 0)
+     make.lolli.plot(make.plot.dat(dat.dis.25.nozero, Age, num.dis), a = 35)
+     save_plot(here("Plots", "uni-dist-grd-int-age.png"), height = 15, width = w)
+     make.lolli.plot(make.plot.dat(dat.dis.25.nozero, Inc, num.dis), a = 52, v = 1.1, h = 1)
+     save_plot(here("Plots", "uni-dist-grd-int-inc.png"), height = 15, width = w)
+     make.lolli.plot(make.plot.dat(dat.dis.25.nozero, PolViews, num.dis), a = 55, v = 1.1, h = 1)
+     save_plot(here("Plots", "uni-dist-grd-int-pol.png"), height = 15, width = w)
+     make.lolli.plot(make.plot.dat(dat.dis.25.nozero, Educ, num.dis), a = 52, v = 1.1, h = 1)
+     save_plot(here("Plots", "uni-dist-grd-int-edu.png"), height = 15, width = w)
+     make.lolli.plot(make.plot.dat(dat.dis.25.nozero, Race, num.dis)[-5, ]) + coord_flip()
+     save_plot(here("Plots", "uni-dist-grd-int-rac.png"), height = 15, width = w)
+     make.lolli.plot(make.plot.dat(dat.dis.25.nozero, Gender, num.dis)[1:2, ]) + coord_flip()
+     save_plot(here("Plots", "uni-dist-grd-int-gen.png"), height = 15, width = w)
 ```
 
 
 # Regression
 ```{r Regression Analysis}
      m1 <- zeroinfl(
-       num.dis ~  Age.n + Educ.n + polviews.n + White + Black | 
-            Age.n + Woman + Asian, 
-       data = dat.dis
+       num.dis ~  Age.n + Educ.n + Inc.n + polviews.n + White + Black | 
+            Age.n + Hisp + White + Black + Woman + ext.Educ, 
+       data = dat.dis.25
        )
      tab_model(m1, transform = NULL, 
                file = here("Tabs", "zinf-reg.html"), 
