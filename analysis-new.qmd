@@ -236,12 +236,23 @@
          Educ.n + Educ2 + Inc.n + Inc2, 
        data = dat.dis
        )
-     tab_model(m1, m2, m3, m4, transform = NULL, digits = 3,
+     names(m1$coefficients$zero) <- c("Intercept", "Age")
+     names(m2$coefficients$zero) <- c("Intercept", "Age", "White", "Woman")
+     names(m3$coefficients$zero) <- c("Intercept", "Age", "White", "Woman",
+                                      "Education", "Education Squared")
+     names(m4$coefficients$zero) <- c("Intercept", "Age", "White", "Woman",
+                                      "Education", "Education Squared", 
+                                      "Income", "Income Squared")
+     tab_model(m1, m2, m3, m4, transform = NULL, digits = 3, prefix.labels = "none",
                file = here("Tabs", "zinf-reg.html"), 
-               auto.label = TRUE, dv.labels = c("Model 1", "Model 2"), 
-               CSS = list(css.table = 'font-size: 12px;',
-                          css.td = 'border-bottom: 0px;'), 
-               show.zeroinf = TRUE, show.ci = FALSE)
+               auto.label = TRUE, dv.labels = c("Model 1", "Model 2", "Model 3", "Model 4"), 
+               CSS = list(css.table = 'font-size: 12px;', css.td = 'border-bottom: 0px;'), 
+               show.zeroinf = TRUE, show.ci = FALSE,
+               pred.labels = c("Intercept", "Age", "Education", "Income", "Pol. Liberalism", 
+                               "White", "Woman")
+               )
+    webshot(here("Tabs", "zinf-reg.html"), here("Tabs", "zinf-reg.png"))
+
 ```
 
 
