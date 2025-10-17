@@ -15,6 +15,7 @@
      library(qualtRics)
      library(kableExtra)
      library(ggplot2)
+     library(ggeffects)
      library(sjPlot)
      library(pscl)
      conflicts_prefer(dplyr::filter)
@@ -29,7 +30,7 @@
       filter(DistributionChannel != "preview") 
    dat.23 <- fetch_survey(surveyID = "SV_dd88aecMxMf0lmK") %>% 
       slice(-1) %>% #getting rid of first row 
-      filter(Q_RecaptchaScore  > 0.50) %>% 
+      filter(Q_RecaptchaScore  > 0.50) %>% #removing suspected bots
       filter(DistributionChannel != "preview")
 ```
 
@@ -91,13 +92,13 @@
                         "Genre", "Percentage Dislike (Lucid)")) %>% 
           kable_classic_2(full_width = T, 
           html_font = "Garamond", font_size = 20) %>% 
-          footnote(general = "N = 1408 (Prolific); N = 898 (Lucid); N = 2306 (All)") %>% 
+          footnote(general = "N = 1408 (Prolific); N = 959 (Lucid); N = 2367 (All)") %>% 
           save_kable(here("Tabs", "desc-tab-dislike.html"))
      webshot(here("Tabs", "desc-tab-dislike.html"), here("Tabs", "desc-tab-dislike.png"))
 ```
 
 ```{r Plot Functions}
-     make.lolli.plot <- function(w, a = 0, v = 0, h = 0, refline = TRUE, ref = 0) {
+     make.lolli.plot <- function(w, a = 0, v = 0, h = 0, refline = TRUE, ref = 0, high) {
           p <- ggplot(data = w, aes(x = w[,1], y = w[,2]))
           p <- p + geom_point(size = 7, color = "blue")
           p <- p + geom_hline(yintercept = ref, 
@@ -108,6 +109,7 @@
           p <- p + theme(axis.text = element_text(size = 16),
                          axis.text.x = element_text(angle = a, vjust = v, hjust = h),
                          axis.title = element_text(size = 16))
+          p <- p + ylim(0, high)
           return(p)
           }
      make.plot.dat <- function(w, x, y) {
@@ -163,7 +165,7 @@
           col.names = c("Count", "Proportion (Prolific)", "Proportion (Lucid)", 
                         "Proportion (All)")) %>% 
           kable_classic_2(full_width = T, html_font = "Garamond", font_size = 20) %>%
-          footnote(general = "N = 1408 (Prolific); N = 898 (Lucid); N = 2306 (All)") %>% 
+          footnote(general = "N = 1408 (Prolific); N = 959 (Lucid); N = 2367 (All)") %>% 
           save_kable(here("Tabs", "desc-tab-dislike-dist.html")) 
      webshot(here("Tabs", "desc-tab-dislike-dist.html"), here("Tabs", "desc-tab-dislike-dist.png"))
 ```
@@ -187,31 +189,31 @@
      w <- 20
      # Cat. Tolerance
      r <- mean(dat.dis$bin.dis)
-     make.lolli.plot(make.plot.dat(dat.dis, Age, bin.dis), a = 35, v = 1.1, h = 1, ref = r)
+     make.lolli.plot(make.plot.dat(dat.dis, Age, bin.dis), a = 35, v = 1.1, h = 1, ref = r, high = 0.4)
      save_plot(here("Plots", "uni-dist-cat-tol-age.png"), height = 15, width = w)
-     make.lolli.plot(make.plot.dat(dat.dis, Inc, bin.dis), a = 52, v = 1.1, h = 1, ref = r)
+     make.lolli.plot(make.plot.dat(dat.dis, Inc, bin.dis), a = 52, v = 1.1, h = 1, ref = r, high = 0.4)
      save_plot(here("Plots", "uni-dist-cat-tol-inc.png"), height = 15, width = w)
-     make.lolli.plot(make.plot.dat(dat.dis, PolViews, bin.dis), a = 55, v = 1.1, h = 1, ref = r)
+     make.lolli.plot(make.plot.dat(dat.dis, PolViews, bin.dis), a = 55, v = 1.1, h = 1, ref = r, high = 0.4)
      save_plot(here("Plots", "uni-dist-cat-tol-pol.png"), height = 15, width = w)
-     make.lolli.plot(make.plot.dat(dat.dis, Educ, bin.dis), a = 52, v = 1.1, h = 1, ref = r)
+     make.lolli.plot(make.plot.dat(dat.dis, Educ, bin.dis), a = 52, v = 1.1, h = 1, ref = r, high = 0.4)
      save_plot(here("Plots", "uni-dist-cat-tol-edu.png"), height = 15, width = w)
-     make.lolli.plot(make.plot.dat(dat.dis, Race, bin.dis)[-5, ], ref = r) + coord_flip()
+     make.lolli.plot(make.plot.dat(dat.dis, Race, bin.dis)[-5, ], ref = r, high = 0.35) + coord_flip()
      save_plot(here("Plots", "uni-dist-cat-tol-rac.png"), height = 15, width = w)
-     make.lolli.plot(make.plot.dat(dat.dis, Gender, bin.dis)[1:2, ], ref = r) + coord_flip()
+     make.lolli.plot(make.plot.dat(dat.dis, Gender, bin.dis)[1:2, ], ref = r, high = 0.25) + coord_flip()
      save_plot(here("Plots", "uni-dist-cat-tol-gen.png"), height = 15, width = w)
      # Graded Intolerance
      r <- mean(dat.dis$num.dis)
-     make.lolli.plot(make.plot.dat(dat.dis, Age, num.dis), a = 35, ref = r)
+     make.lolli.plot(make.plot.dat(dat.dis, Age, num.dis), a = 35, ref = r, high = 6)
      save_plot(here("Plots", "uni-dist-grd-int-age.png"), height = 15, width = w)
-     make.lolli.plot(make.plot.dat(dat.dis, Inc, num.dis), a = 52, v = 1.1, h = 1, ref = r)
+     make.lolli.plot(make.plot.dat(dat.dis, Inc, num.dis), a = 52, v = 1.1, h = 1, ref = r, high = 4)
      save_plot(here("Plots", "uni-dist-grd-int-inc.png"), height = 15, width = w)
-     make.lolli.plot(make.plot.dat(dat.dis, PolViews, num.dis), a = 55, v = 1.1, h = 1, ref = r)
+     make.lolli.plot(make.plot.dat(dat.dis, PolViews, num.dis), a = 55, v = 1.1, h = 1, ref = r, high = 4)
      save_plot(here("Plots", "uni-dist-grd-int-pol.png"), height = 15, width = w)
-     make.lolli.plot(make.plot.dat(dat.dis, Educ, num.dis), a = 52, v = 1.1, h = 1, ref = r)
+     make.lolli.plot(make.plot.dat(dat.dis, Educ, num.dis), a = 52, v = 1.1, h = 1, ref = r, high = 4)
      save_plot(here("Plots", "uni-dist-grd-int-edu.png"), height = 15, width = w)
-     make.lolli.plot(make.plot.dat(dat.dis, Race, num.dis)[-5, ], ref = r) + coord_flip()
+     make.lolli.plot(make.plot.dat(dat.dis, Race, num.dis)[-5, ], ref = r, high = 4) + coord_flip()
      save_plot(here("Plots", "uni-dist-grd-int-rac.png"), height = 15, width = w)
-     make.lolli.plot(make.plot.dat(dat.dis, Gender, num.dis)[1:2, ], ref = r) + coord_flip()
+     make.lolli.plot(make.plot.dat(dat.dis, Gender, num.dis)[1:2, ], ref = r, high = 4) + coord_flip()
      save_plot(here("Plots", "uni-dist-grd-int-gen.png"), height = 15, width = w)
 ```
 
@@ -254,6 +256,7 @@
                )
     webshot(here("Tabs", "zinf-reg.html"), here("Tabs", "zinf-reg.png"), zoom = 4)
 ```
+
 
 ```{r Predicted Probability Plots Data}
     educ.pred <- ggaverage(m4, terms = c("Educ.n"), type = "zi_prob")
