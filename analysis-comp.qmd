@@ -7,13 +7,17 @@
 ```{r setup, include=FALSE}
      knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
      library(conflicted)
-     library(haven)
      library(here)
      library(dplyr)
      library(tidyr)
+     library(webshot)
      library(qualtRics)
+     library(kableExtra)
      library(ggplot2)
+     library(ggeffects)
+     library(sjPlot)
      library(pscl)
+     library(haven)
      conflicts_prefer(dplyr::filter)
      conflicts_prefer(dplyr::select)
      conflicts_prefer(dplyr::summarize)
@@ -150,10 +154,10 @@
             show.zeroinf = TRUE, show.ci = FALSE,
             pred.labels = c("Intercept", "Sample (2025)")
             )
+    webshot(here("Tabs", "zinf-reg-comp.html"), here("Tabs", "zinf-reg-comp.png"), zoom = 4)
 ```
 
-```{r}
-    library(ggeffects)
+```{r Predicted Probabilities}
     pv <- predict_response(m1, "sample", type = "zi_prob")
     p <- plot(pv, ci_style = "errorbar", dot_size = 5.5)
     p <- p + theme_minimal()
