@@ -18,19 +18,20 @@
      library(ggeffects)
      library(sjPlot)
      library(pscl)
+     library(haven)
      conflicts_prefer(dplyr::filter)
      conflicts_prefer(dplyr::select)
      conflicts_prefer(dplyr::summarize)
 ```
 
-```{r Getting Data (Lucid)}
-   dat.25 <- fetch_survey(surveyID = "SV_80RzX3ibOsBq3Lo") %>% 
-      slice(-1) %>% #getting rid of first row 
-      filter(Q_RecaptchaScore  > 0.50) %>%  #removing suspected bots
+```{r Getting Data (Lucid and Prolific)}
+   dat.25 <- fetch_survey(surveyID = "SV_80RzX3ibOsBq3Lo") |> 
+      slice(-1) |> #getting rid of first row 
+      filter(Q_RecaptchaScore  > 0.50) |>  #removing suspected bots
       filter(DistributionChannel != "preview") 
-   dat.23 <- fetch_survey(surveyID = "SV_dd88aecMxMf0lmK") %>% 
-      slice(-1) %>% #getting rid of first row 
-      filter(Q_RecaptchaScore  > 0.50) %>% #removing suspected bots
+   dat.23 <- fetch_survey(surveyID = "SV_dd88aecMxMf0lmK") |> 
+      slice(-1) |> #getting rid of first row 
+      filter(Q_RecaptchaScore  > 0.50) |> #removing suspected bots
       filter(DistributionChannel != "preview")
 ```
 
@@ -41,19 +42,19 @@
      source(here("Functions", "dat.demog.R"))
     # Lucid Data
      dat.dis.25 <- dat.genres(dat.25)$dat.g %>%
-          mutate(across(Classical:Metal, function(x) {if_else(x < 3, 1, 0)})) %>% 
-          rowwise() %>% 
-          mutate(num.dis = sum(c_across(Classical:Metal), na.rm = TRUE)) %>% 
-          ungroup() %>% 
-          mutate(bin.dis = if_else(num.dis == 0, 1, 0)) %>% 
+          mutate(across(Classical:Metal, function(x) {if_else(x < 3, 1, 0)})) |>
+          rowwise() |>
+          mutate(num.dis = sum(c_across(Classical:Metal), na.rm = TRUE)) |>
+          ungroup() |>
+          mutate(bin.dis = if_else(num.dis == 0, 1, 0)) |>
           left_join(dat.demog(dat.25))
     # Prolific Data
      dat.dis.23 <- dat.genres(dat.23)$dat.g %>%
-          mutate(across(Classical:Metal, function(x) {if_else(x < 3, 1, 0)})) %>% 
-          rowwise() %>% 
-          mutate(num.dis = sum(c_across(Classical:Metal), na.rm = TRUE)) %>% 
-          ungroup() %>% 
-          mutate(bin.dis = if_else(num.dis == 0, 1, 0)) %>% 
+          mutate(across(Classical:Metal, function(x) {if_else(x < 3, 1, 0)})) |>
+          rowwise() |>
+          mutate(num.dis = sum(c_across(Classical:Metal), na.rm = TRUE)) |>
+          ungroup() |>
+          mutate(bin.dis = if_else(num.dis == 0, 1, 0)) |>
           left_join(dat.demog(dat.23))
      # All Data
      dat.dis <- rbind(dat.dis.23, dat.dis.25)
@@ -64,23 +65,23 @@
 ```{r Dislikes Data}
     dat.g.25 <- dat.dis.25[, c("id", "Classical", "Country", "Disco",
                             "Jazz", "Musicals", "Pop", "R_and_B",
-                            "Rap", "Reggae", "Rock", "EDM", "Metal")] %>% 
-      pivot_longer(cols = c(2:13), names_to = "Genre", values_to = "Dislike") %>% 
-      group_by(Genre) %>% 
-      summarize(Proportion = mean(Dislike)) %>% 
-      mutate(Proportion = Proportion * 100) %>% 
-      mutate(Proportion = round(Proportion, 1)) %>% 
+                            "Rap", "Reggae", "Rock", "EDM", "Metal")] |>
+      pivot_longer(cols = c(2:13), names_to = "Genre", values_to = "Dislike") |>
+      group_by(Genre) |>
+      summarize(Proportion = mean(Dislike)) |>
+      mutate(Proportion = Proportion * 100) |>
+      mutate(Proportion = round(Proportion, 1)) |>
       data.frame()
      dat.g.25 <- dat.g.25[order(dat.g.25[, "Proportion"], decreasing = TRUE), ]
      
     dat.g.23 <- dat.dis.23[, c("id", "Classical", "Country", "Disco",
                             "Jazz", "Musicals", "Pop", "R_and_B",
-                            "Rap", "Reggae", "Rock", "EDM", "Metal")] %>% 
-      pivot_longer(cols = c(2:13), names_to = "Genre", values_to = "Dislike") %>% 
-      group_by(Genre) %>% 
-      summarize(Proportion = mean(Dislike)) %>% 
-      mutate(Proportion = Proportion * 100) %>% 
-      mutate(Proportion = round(Proportion, 1)) %>% 
+                            "Rap", "Reggae", "Rock", "EDM", "Metal")] |>
+      pivot_longer(cols = c(2:13), names_to = "Genre", values_to = "Dislike") |>
+      group_by(Genre) |>
+      summarize(Proportion = mean(Dislike)) |>
+      mutate(Proportion = Proportion * 100) |>
+      mutate(Proportion = round(Proportion, 1)) |>
       data.frame()
      dat.g.23 <- dat.g.23[order(dat.g.23[, "Proportion"], decreasing = TRUE), ]
      dat.g <- cbind(dat.g.23, dat.g.25)
@@ -89,10 +90,10 @@
 ```{r Dislikes Table}
      kbl(dat.g, caption = "", format = "html", align = c("l", "c", "l", "c"), row.names = F,
           col.names = c("Genre", "Percentage Dislike (Prolific)",
-                        "Genre", "Percentage Dislike (Lucid)")) %>% 
+                        "Genre", "Percentage Dislike (Lucid)")) |>
           kable_classic_2(full_width = T, 
-          html_font = "Garamond", font_size = 20) %>% 
-          footnote(general = "N = 1408 (Prolific); N = 959 (Lucid); N = 2367 (All)") %>% 
+          html_font = "Garamond", font_size = 20) |>
+          footnote(general = "N = 1408 (Prolific); N = 959 (Lucid); N = 2367 (All)") |>
           save_kable(here("Tabs", "desc-tab-dislike.html"))
      webshot(here("Tabs", "desc-tab-dislike.html"), here("Tabs", "desc-tab-dislike.png"))
 ```
@@ -113,46 +114,46 @@
           return(p)
           }
      make.plot.dat <- function(w, x, y) {
-     b <- w %>% 
-          select({{x}}, {{y}}) %>% 
-          group_by({{x}}) %>% 
-          summarize(Proportion = mean({{y}})) %>% 
-          data.frame() %>% 
+     b <- w |>
+          select({{x}}, {{y}}) |>
+          group_by({{x}}) |>
+          summarize(Proportion = mean({{y}})) |>
+          data.frame() |>
           na.omit()
           return(b)
           }
 ```
 
 ```{r Univariate Distribution Data}
-      dat.count.25 <- dat.dis.25 %>% 
-        group_by(num.dis) %>% 
-        summarize(n = n()) %>% 
-        mutate(Prop.25 = n/sum(n)) %>% 
-        rename(Count = num.dis) %>% 
-        mutate(Count = as.factor(Count)) %>% 
-        select(Count, Prop.25) %>% 
+      dat.count.25 <- dat.dis.25 |>
+        group_by(num.dis) |>
+        summarize(n = n()) |>
+        mutate(Prop.25 = n/sum(n)) |>
+        rename(Count = num.dis) |>
+        mutate(Count = as.factor(Count)) |>
+        select(Count, Prop.25) |>
         data.frame()
 
-      dat.count.23 <- dat.dis.23 %>% 
-        group_by(num.dis) %>% 
-        summarize(n = n()) %>% 
-        mutate(Prop.23 = n/sum(n)) %>% 
-        rename(Count = num.dis) %>% 
-        mutate(Count = as.factor(Count)) %>% 
-        select(Count, Prop.23) %>% 
+      dat.count.23 <- dat.dis.23 |>
+        group_by(num.dis) |>
+        summarize(n = n()) |>
+        mutate(Prop.23 = n/sum(n)) |>
+        rename(Count = num.dis) |>
+        mutate(Count = as.factor(Count)) |>
+        select(Count, Prop.23) |>
         data.frame()
       
-      dat.count <- dat.dis %>% 
-        group_by(num.dis) %>% 
-        summarize(n = n()) %>% 
-        mutate(Prop = n/sum(n)) %>% 
-        rename(Count = num.dis) %>% 
-        mutate(Count = as.factor(Count)) %>% 
-        select(Count, Prop) %>% 
+      dat.count <- dat.dis |>
+        group_by(num.dis) |>
+        summarize(n = n()) |>
+        mutate(Prop = n/sum(n)) |>
+        rename(Count = num.dis) |>
+        mutate(Count = as.factor(Count)) |>
+        select(Count, Prop) |>
         data.frame()
       
-      dat.uni <- dat.count.25 %>% 
-        left_join(dat.count.23) %>% 
+      dat.uni <- dat.count.25 |>
+        left_join(dat.count.23) |>
         left_join(dat.count) 
       dat.uni[is.na(dat.uni)] <- 0
       dat.uni <- dat.uni[, c("Count", "Prop.23", "Prop.25", "Prop")]
@@ -163,9 +164,9 @@
      kbl(dat.uni, caption = "", format = "html", align = c("l", "c", "c", "c"), 
          row.names = F, digits = 3,
           col.names = c("Count", "Proportion (Prolific)", "Proportion (Lucid)", 
-                        "Proportion (All)")) %>% 
+                        "Proportion (All)")) |>
           kable_classic_2(full_width = T, html_font = "Garamond", font_size = 20) %>%
-          footnote(general = "N = 1408 (Prolific); N = 959 (Lucid); N = 2367 (All)") %>% 
+          footnote(general = "N = 1408 (Prolific); N = 959 (Lucid); N = 2367 (All)") |>
           save_kable(here("Tabs", "desc-tab-dislike-dist.html")) 
      webshot(here("Tabs", "desc-tab-dislike-dist.html"), here("Tabs", "desc-tab-dislike-dist.png"))
 ```
@@ -260,17 +261,17 @@
 
 ```{r Predicted Probability Plots Data}
     educ.pred <- ggaverage(m4, terms = c("Educ.n"), type = "zi_prob")
-    educ.pred.dat <- data.frame(Educ = 1:6) %>% 
-      mutate(Educ = factor(Educ, labels = levels(dat.dis$Educ))) %>% 
-      cbind(pr = educ.pred$predicted) %>% 
-      cbind(l = educ.pred$conf.low) %>% 
+    educ.pred.dat <- data.frame(Educ = 1:6) |>
+      mutate(Educ = factor(Educ, labels = levels(dat.dis$Educ))) |>
+      cbind(pr = educ.pred$predicted) |>
+      cbind(l = educ.pred$conf.low) |>
       cbind(h = educ.pred$conf.high) 
     
     inc.pred <- ggaverage(m4, terms = c("Inc.n"), type = "zi_prob")
-    inc.pred.dat <- data.frame(Inc = 1:12) %>% 
-      mutate(Inc = factor(Inc, labels = levels(dat.dis$Inc))) %>% 
-      cbind(pr = inc.pred$predicted) %>% 
-      cbind(l = inc.pred$conf.low) %>% 
+    inc.pred.dat <- data.frame(Inc = 1:12) |>
+      mutate(Inc = factor(Inc, labels = levels(dat.dis$Inc))) |>
+      cbind(pr = inc.pred$predicted) |>
+      cbind(l = inc.pred$conf.low) |>
       cbind(h = inc.pred$conf.high) 
 ```
 

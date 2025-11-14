@@ -1,0 +1,167 @@
+---
+  title: "Sociological Science Categorical Tolerance Follow-up (Appendix)"
+  author: "Omar Lizardo"
+  date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+     knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+     library(conflicted)
+     library(haven)
+     library(here)
+     library(dplyr)
+     library(tidyr)
+     library(qualtRics)
+     library(ggplot2)
+     library(pscl)
+     conflicts_prefer(dplyr::filter)
+     conflicts_prefer(dplyr::select)
+     conflicts_prefer(dplyr::summarize)
+     source(here("Functions", "dat.genres.R"))
+```
+
+
+```{r Getting Data (Lucid and Prolific)}
+    dat.25 <- fetch_survey(surveyID = "SV_80RzX3ibOsBq3Lo") |> 
+        slice(-1) |> #getting rid of first row 
+        filter(Q_RecaptchaScore  > 0.50) |>  #removing suspected bots
+        filter(DistributionChannel != "preview") 
+    dat.23 <- fetch_survey(surveyID = "SV_dd88aecMxMf0lmK") |> 
+        slice(-1) |> #getting rid of first row 
+        filter(Q_RecaptchaScore  > 0.50) |> #removing suspected bots
+        filter(DistributionChannel != "preview")
+```
+
+```{r Wrangling Data (Lucid and Prolific)}
+     dat.dis <- rbind(dat.genres(dat.25)$dat.g, dat.genres(dat.23)$dat.g) |> 
+        select(-Disco) |> 
+        mutate(across(Classical:Metal, function(x) {if_else(x < 3, 1, 0)})) |>
+        rowwise() |>
+        mutate(num.dis = sum(c_across(Classical:Metal), na.rm = TRUE)) |> 
+        ungroup() 
+    dat.dis.25 <- dat.genres(dat.25)$dat.g |> 
+        select(-Disco) |> 
+        mutate(across(Classical:Metal, function(x) {if_else(x < 3, 1, 0)})) |>
+        rowwise() |>
+        mutate(num.dis = sum(c_across(Classical:Metal), na.rm = TRUE)) |> 
+        ungroup() 
+```
+
+```{r Getting Data (SSI)}
+    dat.dis.12 <- read_dta("C:/Users/Omar Lizardo/Google Drive/MISC DATA SOURCES/SSI-2012/SSI2012.dta") |> 
+        select("id", ends_with(c("taste")), -starts_with("none")) |> 
+        select(c(1:21)) |> 
+        mutate(across(classicaltaste:hvymtltaste, 
+                ~case_when(. == 1 ~ 0, . == 2 ~ 1, . == 3 ~ 0, . == 4 ~ NA))
+                ) |> 
+        rename(
+                Classical = classicaltaste, 
+                Country = countrytaste,
+                Jazz = jazztaste,
+                Musicals = bwaysttaste,
+                Pop = toppoptaste,
+                R_and_B = blurbtaste,
+                Rap = raphiphoptaste,
+                Reggae = reggaetaste,
+                Rock = croldtaste,
+                Rock2 = controcktaste,
+                Rock3 = indalttaste,
+                EDM = danclubtaste,
+                Metal = hvymtltaste
+                ) |> 
+        mutate(Rock = if_else(Rock == 1 | Rock2 == 1 | Rock3 == 1, 1, 0)) |> 
+        select(-c(Rock2, Rock3), -ends_with("taste")) |> 
+        rowwise() |>
+        mutate(num.dis = sum(c_across(Classical:Metal))) |> 
+        ungroup() |> 
+        na.omit() 
+```
+
+```{r Univariate Distribution Data}
+    dat.count.12 <- dat.dis.12 |> 
+        group_by(num.dis) |>
+        summarize(n = n()) |>
+        mutate(Prop = n/sum(n)) |>
+        rename(Count = num.dis) |>
+        mutate(Count = as.factor(Count)) |>
+        select(Count, Prop) |>
+        data.frame() |> 
+        mutate(sample = "2012")
+        dat.count.12
+    dat.count.25 <- dat.dis.25 |> 
+        group_by(num.dis) |>
+        summarize(n = n()) |>
+        mutate(Prop = n/sum(n)) |>
+        rename(Count = num.dis) |>
+        mutate(Count = as.factor(Count)) |>
+        select(Count, Prop) |>
+        data.frame() |> 
+        mutate(sample = "2025")
+        dat.count.25
+    dat.count <- dat.dis |> 
+        group_by(num.dis) |>
+        summarize(n = n()) |>
+        mutate(Prop = n/sum(n)) |>
+        rename(Count = num.dis) |>
+        mutate(Count = as.factor(Count)) |>
+        select(Count, Prop) |>
+        data.frame() |> 
+        mutate(sample = "2023/25")
+        dat.count
+```
+
+```{r Testing for Equality of Distribution Across Samples}
+    ks.test(dat.dis.12$num.dis, dat.dis$num.dis)
+```
+
+```{r Comparing Univariate Distribution Plot}
+    dat.uni <- rbind(dat.count.12, dat.count.25)
+    p <- ggplot(data = dat.uni, aes(Count, y = Prop, group = sample, color = sample))
+    p <- p + geom_vline(xintercept = 2, color = "red", linetype = 2, linewidth = 1)
+    p <- p + geom_line(linewidth = 1) 
+    p <- p + geom_point(size = 6)
+    p <- p + theme_minimal() 
+    p <- p + labs(x = "Number of Dislikes", y = "")
+    p <- p + theme(axis.text = element_text(size = 18),
+                    axis.text.x = element_text(hjust = 0.6),
+                    axis.title = element_text(size = 18),
+                    legend.title = element_blank(),
+                    legend.position = "top",
+                    legend.text = element_text(size = 18)
+                    )
+    p <- p + ylim(0, 0.25)
+    p <- p + scale_color_manual(values = c("blue", "brown"))
+    p
+    save_plot(here("Plots", "uni-dist-cat-tol-comp.png"), height = 15, width = 20)
+```
+
+```{r Zero Inflated Regression}
+    dat.dis.12$sample = "2012"
+    dat.dis.25$sample = "2025"
+    dat.dis$sample = "2021/23/25"
+    pooled.dat <- rbind(dat.dis.25, dat.dis.12)
+    pooled.dat$sample <- factor(pooled.dat$sample)
+    m1 <- zeroinfl(num.dis ~ sample | sample, data = pooled.dat)
+    summary(m1)
+    tab_model(m1, transform = NULL, digits = 3, prefix.labels = "none",
+            file = here("Tabs", "zinf-reg-comp.html"), 
+            auto.label = TRUE, dv.labels = c("Model 1"), 
+            CSS = list(css.table = 'font-size: 12px;', css.td = 'border-bottom: 0px;'), 
+            show.zeroinf = TRUE, show.ci = FALSE,
+            pred.labels = c("Intercept", "Sample (2025)")
+            )
+```
+
+```{r}
+    library(ggeffects)
+    pv <- predict_response(m1, "sample", type = "zi_prob")
+    p <- plot(pv, ci_style = "errorbar", dot_size = 5.5)
+    p <- p + theme_minimal()
+    p <- p + theme(axis.text = element_text(size = 18),
+                    axis.title = element_blank(),
+                    plot.title =  element_text(size = 24)
+                    )
+    p <- p + ggtitle("Predicted Zero-Inflation Probabilities")
+    p
+    save_plot(here("Plots", "zip-pred-comp.png"), height = 20, width = 15)
+```
