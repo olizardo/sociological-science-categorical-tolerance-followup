@@ -134,7 +134,7 @@
                     legend.text = element_text(size = 18)
                     )
     p <- p + ylim(0, 0.25)
-    p <- p + scale_color_manual(values = c("blue", "brown"))
+    p <- p + scale_color_manual(values = c("lightblue", "blue"))
     p
     save_plot(here("Plots", "uni-dist-cat-tol-comp.png"), height = 15, width = 20)
 ```
@@ -147,7 +147,7 @@
     pooled.dat$sample <- factor(pooled.dat$sample)
     m1 <- zeroinfl(num.dis ~ sample | sample, data = pooled.dat)
     summary(m1)
-    tab_model(m1, transform = NULL, digits = 3, prefix.labels = "none",
+    tab_model(m1, transform = NULL, digits = 3, prefix.labels = "none", show.stat = TRUE,
             file = here("Tabs", "zinf-reg-comp.html"), 
             auto.label = TRUE, dv.labels = c("Model 1"), 
             CSS = list(css.table = 'font-size: 12px;', css.td = 'border-bottom: 0px;'), 
@@ -167,5 +167,5 @@
                     )
     p <- p + ggtitle("Predicted Zero-Inflation Probabilities")
     p
-    save_plot(here("Plots", "zip-pred-comp.png"), height = 20, width = 15)
+    save_plot(here("Plots", "zip-pred-comp.png"), height = 20, width = 20)
 ```
