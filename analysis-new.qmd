@@ -24,7 +24,7 @@
      conflicts_prefer(dplyr::summarize)
 ```
 
-```{r Getting Data (Lucid and Prolific)}
+<!-- ```{r Getting Data (Lucid and Prolific)}
    dat.25 <- fetch_survey(surveyID = "SV_80RzX3ibOsBq3Lo") |> 
       slice(-1) |> #getting rid of first row 
       filter(Q_RecaptchaScore  > 0.50) |>  #removing suspected bots
@@ -58,11 +58,13 @@
           left_join(dat.demog(dat.23))
      # All Data
      dat.dis <- rbind(dat.dis.23, dat.dis.25)
-```
+    save(dat.dis, dat.dis.23, dat.dis.25, file = here("cint-prolific-data1.rda"))
+``` -->
 
 # Descriptives
 
 ```{r Dislikes Data}
+    load(here("cint-prolific-data1.rda"))
     dat.g.25 <- dat.dis.25[, c("id", "Classical", "Country", "Disco",
                             "Jazz", "Musicals", "Pop", "R_and_B",
                             "Rap", "Reggae", "Rock", "EDM", "Metal")] |>
