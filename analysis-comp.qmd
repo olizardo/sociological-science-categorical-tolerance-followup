@@ -25,7 +25,7 @@
 ```
 
 
-```{r Getting Data (Lucid and Prolific)}
+<!-- ```{r Getting Data (Lucid and Prolific)}
     dat.25 <- fetch_survey(surveyID = "SV_80RzX3ibOsBq3Lo") |> 
         slice(-1) |> #getting rid of first row 
         filter(Q_RecaptchaScore  > 0.50) |>  #removing suspected bots
@@ -49,10 +49,11 @@
         rowwise() |>
         mutate(num.dis = sum(c_across(Classical:Metal), na.rm = TRUE)) |> 
         ungroup() 
-```
+    save(dat.dis, dat.dis.25, file = here("cint-prolific-data.rda"))
+``` -->
 
 ```{r Getting Data (SSI)}
-    dat.dis.12 <- read_dta("C:/Users/Omar Lizardo/Google Drive/MISC DATA SOURCES/SSI-2012/SSI2012.dta") |> 
+    dat.dis.12 <- read_dta(here("SSI2012.dta")) |> 
         select("id", ends_with(c("taste")), -starts_with("none")) |> 
         select(c(1:21)) |> 
         mutate(across(classicaltaste:hvymtltaste, 
@@ -82,6 +83,7 @@
 ```
 
 ```{r Univariate Distribution Data}
+    load(here("cint-prolific-data.rda"))
     dat.count.12 <- dat.dis.12 |> 
         group_by(num.dis) |>
         summarize(n = n()) |>
