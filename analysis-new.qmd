@@ -204,7 +204,7 @@
      save_plot(here("Plots", "uni-dist-cat-tol-gen.png"), height = 15, width = w)
      # Graded Intolerance
      r <- mean(dat.dis$num.dis)
-     make.lolli.plot(make.plot.dat(dat.dis, Age, num.dis), a = 35, ref = r, high = 6)
+     make.lolli.plot(make.plot.dat(dat.dis, Age, num.dis), a = 35, ref = r, high = 6, v = 1.75, h = 1)
      save_plot(here("Plots", "uni-dist-grd-int-age.png"), height = 15, width = w)
      make.lolli.plot(make.plot.dat(dat.dis, Inc, num.dis), a = 52, v = 1.1, h = 1, ref = r, high = 4)
      save_plot(here("Plots", "uni-dist-grd-int-inc.png"), height = 15, width = w)
