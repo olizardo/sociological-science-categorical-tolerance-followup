@@ -159,13 +159,14 @@
 
 ```{r Predicted Probabilities}
     pv <- predict_response(m1, "sample", type = "zi_prob")
-    p <- plot(pv, ci_style = "errorbar", dot_size = 5.5)
+    p <- plot(pv, ci_style = "errorbar", dot_size = 6)
     p <- p + theme_minimal()
-    p <- p + theme(axis.text = element_text(size = 18),
+    p <- p + theme(axis.text.y = element_text(size = 18),
+                    axis.text.x = element_text(size = 24),
                     axis.title = element_blank(),
                     plot.title =  element_text(size = 24)
                     )
-    p <- p + ggtitle("Predicted Zero-Inflation Probabilities")
+    p <- p + ggtitle("Predicted Zero-Inflation Probabilities") 
     p
     save_plot(here("Plots", "zip-pred-comp.png"), height = 20, width = 20)
 ```
