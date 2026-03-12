@@ -1,0 +1,47 @@
+---
+  title: "Overclaiming in 2012"
+  author: "Omar Lizardo"
+  date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+     knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+     library(conflicted)
+     library(here)
+     library(dplyr)
+     library(tidyr)
+     library(haven)
+     library(ggplot2)
+     conflicts_prefer(dplyr::filter)
+     conflicts_prefer(dplyr::select)
+     conflicts_prefer(dplyr::summarize)
+     source(here("Functions", "dat.genres.R"))
+```
+
+```{r Getting Data (SSI)}
+    dat.12 <- read_dta(here("SSI2012.dta")) |> 
+        select("id", classicallike:hvymtllike, ends_with(c("lis")), 
+                -starts_with("none"), -ends_with("taste")) 
+    dat.12.m <- dat.12 |> 
+        summarize(across(classicallike:hvymtllis, \(x) mean(x, na.rm = TRUE))) 
+    dat.12.m <- data.frame(matrix(dat.12.m, 20, 2)) |> 
+        rename(like = 1, listen = 2) |> 
+        mutate(across(like:listen, as.numeric)) |> 
+        mutate(overclaim = like - listen) |> 
+        mutate(genres = as.factor(c("Classical", "Opera", "Jazz", "Musicals", "Easy", "Bigband", "Classic_Rock", "Country", "Bluegrass", "Folk", "Gospel", "Salsa", "Rap", "Blues/R&B", "Reggae",
+    "Pop", "Contemp_Rock", "Alt_Rock", "EDM", "Metal")))
+
+```
+
+
+```{r}
+    p <- ggplot(data = dat.12.m, aes(x = reorder(genres, overclaim), y = overclaim, fill = genres))
+    p <- p + geom_col()
+    p <- p + theme_minimal() + coord_flip()
+    p <- p + labs(x = "", y = "")
+    p <- p + geom_hline(yintercept = mean(dat.12.m$overclaim), linetype = 2, color = "red", linewidth = 1.5)
+    p <- p + ggtitle("Overclaim Coefficient (Pr(Like) - Pr(Listen))")
+    p <- p + theme(legend.position = "none", axis.text = element_text(size  = 16, face = "bold"), title = element_text(size = 20))
+
+    p
+```
