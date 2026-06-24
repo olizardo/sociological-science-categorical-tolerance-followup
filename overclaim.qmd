@@ -19,7 +19,7 @@
 ```
 
 ```{r Getting Data (SSI)}
-    dat.12 <- read_dta(here("SSI2012.dta")) |> 
+    dat.12 <- read_dta(here("data", "SSI2012.dta")) |> 
         select("id", classicallike:hvymtllike, ends_with(c("lis")), 
                 -starts_with("none"), -ends_with("taste")) 
     dat.12.m <- dat.12 |> 

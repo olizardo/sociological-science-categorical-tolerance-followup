@@ -12,7 +12,6 @@
      library(dplyr)
      library(tidyr)
      library(webshot)
-     library(qualtRics)
      library(kableExtra)
      library(ggplot2)
      library(ggeffects)
@@ -22,9 +21,20 @@
      conflicts_prefer(dplyr::filter)
      conflicts_prefer(dplyr::select)
      conflicts_prefer(dplyr::summarize)
+
+     # Safe webshot wrapper to prevent compilation failure if PhantomJS is missing
+     safe_webshot <- function(html_path, png_path, ...) {
+       if (webshot::is_phantomjs_installed()) {
+         webshot::webshot(html_path, png_path, ...)
+       } else {
+         warning("PhantomJS is not installed. Skipping saving table image to: ", basename(png_path), 
+                 ". Run `webshot::install_phantomjs()` to enable HTML-to-PNG table export.")
+       }
+     }
 ```
 
-<!-- ```{r Getting Data (Lucid and Prolific)}
+```{r Getting Data (Lucid and Prolific)}
+#| eval: false
    dat.25 <- fetch_survey(surveyID = "SV_80RzX3ibOsBq3Lo") |> 
       slice(-1) |> #getting rid of first row 
       filter(Q_RecaptchaScore  > 0.50) |>  #removing suspected bots
@@ -38,6 +48,7 @@
 # Data Wrangling
 
 ```{r Wrangling Dislikes Data and Merging Demographics}
+#| eval: false
      source(here("Functions", "dat.genres.R"))
      source(here("Functions", "dat.demog.R"))
     # Lucid Data
@@ -58,13 +69,13 @@
           left_join(dat.demog(dat.23))
      # All Data
      dat.dis <- rbind(dat.dis.23, dat.dis.25)
-    save(dat.dis, dat.dis.23, dat.dis.25, file = here("cint-prolific-data1.rda"))
-``` -->
+    save(dat.dis, dat.dis.23, dat.dis.25, file = here("data", "cint-prolific-data1.rda"))
+```
 
 # Descriptives
 
 ```{r Dislikes Data}
-    load(here("cint-prolific-data1.rda"))
+    load(here("data", "cint-prolific-data1.rda"))
     dat.g.25 <- dat.dis.25[, c("id", "Classical", "Country", "Disco",
                             "Jazz", "Musicals", "Pop", "R_and_B",
                             "Rap", "Reggae", "Rock", "EDM", "Metal")] |>
@@ -97,7 +108,7 @@
           html_font = "Garamond", font_size = 20) |>
           footnote(general = "N = 1408 (Prolific); N = 959 (Lucid); N = 2367 (All)") |>
           save_kable(here("Tabs", "desc-tab-dislike.html"))
-     webshot(here("Tabs", "desc-tab-dislike.html"), here("Tabs", "desc-tab-dislike.png"))
+     safe_webshot(here("Tabs", "desc-tab-dislike.html"), here("Tabs", "desc-tab-dislike.png"))
 ```
 
 ```{r Plot Functions}
@@ -170,7 +181,7 @@
           kable_classic_2(full_width = T, html_font = "Garamond", font_size = 20) %>%
           footnote(general = "N = 1408 (Prolific); N = 959 (Lucid); N = 2367 (All)") |>
           save_kable(here("Tabs", "desc-tab-dislike-dist.html")) 
-     webshot(here("Tabs", "desc-tab-dislike-dist.html"), here("Tabs", "desc-tab-dislike-dist.png"))
+     safe_webshot(here("Tabs", "desc-tab-dislike-dist.html"), here("Tabs", "desc-tab-dislike-dist.png"))
 ```
 
 ```{r Univariate Distribution Plot}
@@ -257,7 +268,7 @@
                pred.labels = c("Intercept", "Age", "Education", "Income", "Pol. Liberalism", 
                                "White", "Woman", "Survey (Prolific 2023)", "Survey (Lucid 2025)")
                )
-    webshot(here("Tabs", "zinf-reg.html"), here("Tabs", "zinf-reg.png"), zoom = 4)
+    safe_webshot(here("Tabs", "zinf-reg.html"), here("Tabs", "zinf-reg.png"), zoom = 4)
 ```
 
 
