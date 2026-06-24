@@ -71,4 +71,4 @@ To reproduce the findings, follow these simple steps:
    * **Comparative Appendix Results**: Open and render `[analysis-comp.qmd](analysis-comp.qmd)`.
    * **Supplemental Work**: Open and render `[overclaim.qmd](overclaim.qmd)`.
 
-Upon rendering/running, all tables and figures will be automatically saved to the `Tabs/` and `Plots/` folders, matching the published article exactly!
+Upon rendering/running, all tables and figures will be automatically saved to the `Tabs/` and `Plots/` folders, matching the published article exactly.
