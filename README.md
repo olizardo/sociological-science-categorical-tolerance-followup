@@ -1,6 +1,6 @@
 # Reproducibility Resource: The Forward March of Categorical Tolerance in the United States
 
-This repository contains the data, functions, and analysis notebooks to fully reproduce all findings, figures, and tables in the paper:
+This repository contains the complete replication materials—data, code, manuscripts, and presentation slides—for the paper **"The Forward March of Categorical Tolerance in the United States"** by Omar Lizardo.
 
 > **Lizardo, O. (2026). The Forward March of Categorical Tolerance in the United States. *Sociological Science*, 13, 22-44.**  
 > [Read the Paper (Sociological Science)](https://sociologicalscience.com/articles-v13-2-22/) | [Download PDF](https://sociologicalscience.com/download/volume-13/january/SocSci_v13_22to44.pdf)
@@ -9,32 +9,30 @@ This repository contains the data, functions, and analysis notebooks to fully re
 
 ## 📂 Repository Structure
 
-The repository has been structured logically to keep the root tidy and the files easy to navigate:
+The project directory is structured as follows:
 
-* **📂 Root Directory**
-  * `[analysis-new.qmd](analysis-new.qmd)`: The main analysis notebook reproducing the primary results, tables, and figures from the paper.
-  * `[analysis-comp.qmd](analysis-comp.qmd)`: The comparative analysis notebook reproducing the appendix and overtime comparative findings (2012 vs 2025).
-  * `[overclaim.qmd](overclaim.qmd)`: Supplemental analysis on overclaiming in the 2012 data.
-  * `[sociological-science-categorical-tolerance-followup.Rproj](sociological-science-categorical-tolerance-followup.Rproj)`: R Project file. Open this in your editor (e.g., RStudio or Positron) to automatically configure the working directory via the `here` package.
-* **`📂 data/`**: Contains the processed datasets required for the analyses:
-  * `cint-prolific-data1.rda`: Primary dataset for 2023/2025 surveys.
-  * `cint-prolific-data2.rda`: Cleaned dataset for 2025 comparative analysis.
-  * `SSI2012.dta`: Stata dataset for the 2012 comparative survey.
-* **`📂 Functions/`**: Active helper R scripts:
-  * `dat.genres.R`: Cleans and formats the musical genre taste responses.
-  * `dat.demog.R`: Standardizes and cleans the demographic variables.
-* **`📂 Plots/`**: Output directory where all reproduced figures (PNG files) are saved.
-* **`📂 Tabs/`**: Output directory where all reproduced tables (HTML and PNG versions) are saved.
-* **`📂 presentations/`**: Materials for conference/seminar presentations (includes `duke-presentation.qmd`).
-* **`📂 manuscript/`**: Source LaTeX files (`manuscript.tex`, `.bib`, `.bst`) for the paper's manuscript.
-* **`📂 archive/`**: Legacy scripts (e.g., old Google Sheet data loader) kept for reference but not needed for replication.
+```text
+├── analysis-new.qmd                # Main analysis notebook reproducing primary results
+├── analysis-comp.qmd               # Comparative analysis notebook (2012 vs 2025)
+├── overclaim.qmd                   # Supplemental analysis on overclaiming in 2012 data
+├── sociological-science-categorical-tolerance-followup.Rproj
+├── data/                           # Processed datasets (.rda and .dta)
+├── Functions/                      # Active helper R scripts (e.g., dat.genres.R)
+├── Plots/                          # Output directory for reproduced figures (PNGs)
+├── Tabs/                           # Output directory for reproduced tables (HTML and PNGs)
+├── presentations/                  # Materials for conference/seminar presentations
+├── manuscript/                     # Source LaTeX files for the paper manuscript
+└── archive/                        # Legacy scripts kept for reference
+```
 
 ---
 
 ## 🛠️ Prerequisites & Installation
 
+To run the reproducibility workflow, you will need **R** and the **Quarto** CLI (pre-installed in Positron and RStudio).
+
 ### 1. Required R Packages
-The analyses rely on several standard R packages. You can install all of them at once by running the following command in your R console:
+Ensure you have the required R packages installed. You can install them by running the following command in your R console:
 
 ```R
 install.packages(c(
@@ -55,20 +53,35 @@ webshot::install_phantomjs()
 
 ---
 
-## 🚀 Step-by-Step Reproduction Guide
+## 🚀 How to Reproduce the Findings
 
-To reproduce the findings, follow these simple steps:
+1. **Clone the Repository**: Clone this repository to your local machine using git or download it as a ZIP file.
+2. **Open the Project**: Open the `.Rproj` or `.R` file in your editor (e.g., RStudio or Positron). This ensures paths are resolved correctly relative to the project root.
+3. **Install Dependencies**: Ensure the packages listed above are installed.
+4. **Run the Computational Pipeline**:
+   * **Using the Command Line (Quarto CLI)**:
+     ```bash
+     quarto render analysis.qmd
+     ```
+   * **Using R**:
+     ```R
+     quarto::quarto_render("analysis.qmd")
+     ```
+   * Or run interactively in your IDE. This step ensures that all tables and figures are updated directly from the code, guaranteeing that the numbers in the paper are exactly what the code computes.
 
-1. **Clone the Repository**:
-   Clone this repository to your local machine using git or download it as a ZIP file.
-2. **Open the Project**:
-   Double-click `sociological-science-categorical-tolerance-followup.Rproj` to open the project in your favorite R IDE (RStudio, Positron, etc.). This ensures the `here` package can resolve all paths relative to the project root.
-3. **Install Dependencies**:
-   Install the R packages listed above.
-4. **Render the Analyses**:
-   You can run individual code blocks interactively or render the entire Quarto document to compile a beautiful, integrated HTML report:
-   * **Primary Findings**: Open and render `[analysis-new.qmd](analysis-new.qmd)`.
-   * **Comparative Appendix Results**: Open and render `[analysis-comp.qmd](analysis-comp.qmd)`.
-   * **Supplemental Work**: Open and render `[overclaim.qmd](overclaim.qmd)`.
+---
 
-Upon rendering/running, all tables and figures will be automatically saved to the `Tabs/` and `Plots/` folders, matching the published article exactly.
+## 📝 License & Citation
+
+If you use the materials or code in this repository, please cite the paper:
+
+```bibtex
+@article{lizardo2026forward,
+  title={The Forward March of Categorical Tolerance in the United States},
+  author={Lizardo, Omar},
+  journal={Sociological Science},
+  volume={13},
+  pages={22--44},
+  year={2026}
+}
+```
